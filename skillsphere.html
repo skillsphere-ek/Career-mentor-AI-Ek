@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillSphere — Find your path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EEF1F6;
+    --panel: #FFFFFF;
+    --ink: #16213E;
+    --ink-dim: #5B6478;
+    --gold: #C98A2C;
+    --teal: #2E7D6B;
+    --line: #DBE0EA;
+    --stamp: #C0392B;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior: smooth; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation: none !important; transition: none !important; } }
+
+  a{ color: inherit; }
+  button{ font-family: inherit; cursor: pointer; }
+
+  .wrap{ max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position: sticky; top:0; z-index: 40;
+    background: rgba(238,241,246,0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner{
+    max-width: 1080px; margin: 0 auto; padding: 16px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:19px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .brand .dot{ width:9px; height:9px; border-radius:50%; background: var(--gold); }
+  .profile-chip{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--ink-dim);
+    border:1px solid var(--line); padding:7px 14px; border-radius:100px;
+    background: var(--panel); display:none; align-items:center; gap:8px;
+  }
+  .profile-chip.show{ display:flex; }
+  .profile-chip button{
+    background:none; border:none; color: var(--gold); font-family:inherit; font-size:12px; font-weight:500;
+  }
+
+  /* ---------- ONBOARDING OVERLAY ---------- */
+  .overlay{
+    position: fixed; inset:0; z-index: 100;
+    background: rgba(22,33,62,0.55);
+    display:flex; align-items:center; justify-content:center;
+    padding: 24px;
+  }
+  .overlay.hidden{ display:none; }
+  .onboard-card{
+    background: var(--panel); max-width: 480px; width:100%;
+    padding: 40px; border-radius: 4px;
+    box-shadow: 0 30px 60px rgba(22,33,62,0.25);
+    position: relative;
+  }
+  .stamp-mark{
+    position:absolute; top:-14px; right:24px;
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.1em;
+    background: var(--stamp); color:#fff; padding:6px 12px; border-radius:2px;
+    transform: rotate(4deg);
+  }
+  .onboard-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.12em;
+    text-transform:uppercase; color: var(--gold); margin-bottom:10px;
+  }
+  .onboard-card h2{
+    font-family:'Space Grotesk', sans-serif; font-size:28px; font-weight:600; margin-bottom:8px;
+  }
+  .onboard-sub{ color: var(--ink-dim); font-size:14px; margin-bottom:28px; }
+  .field{ margin-bottom:18px; }
+  .field label{
+    display:block; font-size:12px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.06em; color: var(--ink-dim); margin-bottom:6px;
+  }
+  .field input, .field select{
+    width:100%; padding:11px 14px; border:1.5px solid var(--line); border-radius:4px;
+    font-family:'Inter', sans-serif; font-size:15px; background:#fbfcfe; color: var(--ink);
+  }
+  .field input:focus, .field select:focus{ outline:2px solid var(--gold); outline-offset:1px; border-color: var(--gold); }
+  .stage-toggle{ display:flex; gap:10px; margin-bottom:18px; }
+  .stage-toggle button{
+    flex:1; padding:10px; border:1.5px solid var(--line); border-radius:4px; background:#fbfcfe;
+    font-size:14px; font-weight:500; color: var(--ink-dim); transition: all .15s;
+  }
+  .stage-toggle button.active{ border-color: var(--teal); color: var(--teal); background:#EAF4F1; }
+  .btn-primary{
+    width:100%; padding:13px; background: var(--ink); color:#fff; border:none; border-radius:4px;
+    font-weight:600; font-size:15px; margin-top:8px; transition: background .15s;
+  }
+  .btn-primary:hover{ background: var(--teal); }
+  .skip-link{
+    display:block; text-align:center; margin-top:14px; font-size:13px; color: var(--ink-dim);
+    background:none; border:none; text-decoration: underline; width:100%;
+  }
+
+  /* ---------- HERO ---------- */
+  header.hero{ padding: 72px 0 56px; }
+  .hero-eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.14em;
+    text-transform:uppercase; color: var(--gold); margin-bottom:16px;
+  }
+  h1.hero-title{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size: clamp(34px, 5.4vw, 58px);
+    line-height:1.05; max-width: 780px; letter-spacing:-0.01em;
+  }
+  .hero-sub{ color: var(--ink-dim); font-size:17px; max-width:560px; margin-top:18px; }
+
+  .search-row{
+    margin-top:32px; display:flex; gap:12px; flex-wrap:wrap;
+  }
+  .search-box{
+    flex:1; min-width:240px; position:relative;
+  }
+  .search-box input{
+    width:100%; padding:15px 18px; border-radius:4px; border:1.5px solid var(--line);
+    font-size:15px; background: var(--panel); font-family:'Inter', sans-serif;
+  }
+  .search-box input:focus{ outline:2px solid var(--gold); outline-offset:1px; border-color:var(--gold); }
+
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:20px; }
+  .chip{
+    padding:8px 16px; border-radius:100px; border:1.5px solid var(--line); background: var(--panel);
+    font-size:13px; font-weight:500; color: var(--ink-dim); transition: all .15s;
+  }
+  .chip.active{ background: var(--ink); color:#fff; border-color: var(--ink); }
+  .chip:hover:not(.active){ border-color: var(--gold); color: var(--ink); }
+
+  /* ---------- RESULTS ---------- */
+  .results-label{
+    font-family:'JetBrains Mono', monospace; font-size:12px; letter-spacing:0.1em; text-transform:uppercase;
+    color: var(--ink-dim); margin: 44px 0 18px; display:flex; align-items:center; gap:12px;
+  }
+  .results-label::after{ content:""; flex:1; height:1px; background: var(--line); }
+
+  .card-grid{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:16px; padding-bottom: 80px;
+  }
+  .career-card{
+    background: var(--panel); border:1px solid var(--line); border-radius:6px; padding:22px;
+    text-align:left; transition: transform .15s, box-shadow .15s; position:relative;
+  }
+  .career-card:hover, .career-card:focus-visible{
+    transform: translateY(-3px); box-shadow: 0 12px 24px rgba(22,33,62,0.1); border-color: var(--gold);
+  }
+  .stamp-badge{
+    width:44px; height:44px; border-radius:50%; border:2px solid var(--stamp); color: var(--stamp);
+    display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace;
+    font-weight:600; font-size:13px; margin-bottom:16px; transform: rotate(-3deg);
+  }
+  .career-card h3{ font-family:'Space Grotesk', sans-serif; font-size:19px; font-weight:600; margin-bottom:6px; }
+  .career-card .cat{ font-size:12px; color: var(--gold); font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px; }
+  .career-card p{ font-size:13.5px; color: var(--ink-dim); }
+  .no-results{ color: var(--ink-dim); padding: 40px 0; font-size:15px; }
+
+  /* ---------- DETAIL MODAL ---------- */
+  .detail-overlay{
+    position:fixed; inset:0; background: rgba(22,33,62,0.6); z-index:90;
+    display:flex; justify-content:center; align-items:flex-start; padding: 40px 20px; overflow-y:auto;
+  }
+  .detail-overlay.hidden{ display:none; }
+  .detail-card{
+    background: var(--bg); max-width: 760px; width:100%; border-radius:8px; overflow:hidden;
+    margin-bottom: 40px;
+  }
+  .detail-head{
+    background: var(--ink); color:#fff; padding: 40px 40px 32px; position:relative;
+  }
+  .detail-close{
+    position:absolute; top:20px; right:20px; background:none; border:1.5px solid rgba(255,255,255,0.3);
+    color:#fff; width:34px; height:34px; border-radius:50%; font-size:16px;
+  }
+  .detail-close:hover{ border-color:#fff; }
+  .detail-cat{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--gold); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:10px; }
+  .detail-head h2{ font-family:'Space Grotesk', sans-serif; font-size: clamp(28px,4vw,38px); margin-bottom:12px; }
+  .detail-head p{ color: #C4CAE0; max-width: 540px; font-size:15px; }
+
+  .detail-body{ padding: 36px 40px 48px; }
+  .detail-section{ margin-bottom: 40px; }
+  .detail-section h4{
+    font-family:'JetBrains Mono', monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.1em;
+    color: var(--gold); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+  }
+  .detail-section h4::after{ content:""; flex:1; height:1px; background: var(--line); }
+
+  /* path timeline - real sequence, numbering is meaningful */
+  .path-timeline{ position:relative; padding-left: 28px; }
+  .path-timeline::before{ content:""; position:absolute; left:9px; top:6px; bottom:6px; width:2px; background: var(--line); }
+  .path-step{ position:relative; padding-bottom: 26px; }
+  .path-step:last-child{ padding-bottom:0; }
+  .path-step::before{
+    content: attr(data-n); position:absolute; left:-28px; top:0; width:20px; height:20px; border-radius:50%;
+    background: var(--panel); border:2px solid var(--teal); color: var(--teal); font-family:'JetBrains Mono', monospace;
+    font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
+  }
+  .path-step.current::before{ background: var(--teal); color:#fff; }
+  .path-step-title{ font-weight:600; font-size:15.5px; margin-bottom:4px; }
+  .path-step-age{ font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--ink-dim); margin-bottom:4px; }
+  .path-step-desc{ font-size:14px; color: var(--ink-dim); }
+  .current-tag{
+    display:inline-block; font-family:'JetBrains Mono', monospace; font-size:10px; background: var(--teal); color:#fff;
+    padding:2px 8px; border-radius:100px; margin-left:8px; vertical-align:middle;
+  }
+
+  .skills-list{ display:flex; flex-wrap:wrap; gap:8px; }
+  .skill-pill{ background: var(--panel); border:1px solid var(--line); border-radius:100px; padding:7px 14px; font-size:13px; }
+
+  .problem-card{ background: var(--panel); border-left: 3px solid var(--stamp); border-radius:4px; padding:16px 18px; margin-bottom:12px; }
+  .problem-card .p-title{ font-weight:600; font-size:14.5px; margin-bottom:6px; }
+  .problem-card .p-fix{ font-size:13.5px; color: var(--ink-dim); }
+  .problem-card .p-fix strong{ color: var(--teal); font-weight:600; }
+
+  .stat-row{ display:flex; gap:14px; flex-wrap:wrap; }
+  .stat-box{ background: var(--panel); border:1px solid var(--line); border-radius:6px; padding:16px 20px; flex:1; min-width:150px; }
+  .stat-box .num{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:20px; color: var(--ink); }
+  .stat-box .lbl{ font-size:12px; color: var(--ink-dim); margin-top:2px; }
+
+  .ask-chat-btn{
+    width:100%; padding:14px; background: var(--gold); color:#fff; border:none; border-radius:6px;
+    font-weight:600; font-size:14.5px; margin-top:8px;
+  }
+  .ask-chat-btn:hover{ background:#B37A24; }
+
+  /* ---------- CHAT WIDGET ---------- */
+  .chat-fab{
+    position: fixed; bottom: 24px; right:24px; z-index:80;
+    width:60px; height:60px; border-radius:50%; background: var(--ink); color:#fff; border:none;
+    box-shadow: 0 10px 24px rgba(22,33,62,0.35); font-size:24px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .chat-fab:hover{ background: var(--teal); }
+  .chat-panel{
+    position: fixed; bottom: 96px; right:24px; z-index:80; width: 380px; max-width: calc(100vw - 32px);
+    height: 520px; max-height: calc(100vh - 140px); background: var(--panel); border-radius:12px;
+    box-shadow: 0 20px 50px rgba(22,33,62,0.3); display:flex; flex-direction:column; overflow:hidden;
+  }
+  .chat-panel.hidden{ display:none; }
+  .chat-head{ background: var(--ink); color:#fff; padding: 16px 20px; display:flex; justify-content:space-between; align-items:center; }
+  .chat-head .t{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:15px; }
+  .chat-head .s{ font-size:11px; color:#9FB0D8; font-family:'JetBrains Mono', monospace; }
+  .chat-head button{ background:none; border:none; color:#fff; font-size:18px; }
+  .chat-messages{ flex:1; overflow-y:auto; padding: 18px; display:flex; flex-direction:column; gap:12px; }
+  .msg{ max-width: 85%; padding: 10px 14px; border-radius:12px; font-size:14px; line-height:1.5; }
+  .msg.bot{ background: var(--bg); align-self:flex-start; border-bottom-left-radius:2px; }
+  .msg.user{ background: var(--teal); color:#fff; align-self:flex-end; border-bottom-right-radius:2px; }
+  .msg.typing{ background: var(--bg); align-self:flex-start; color: var(--ink-dim); font-style:italic; }
+  .chat-input-row{ display:flex; gap:8px; padding: 14px; border-top:1px solid var(--line); }
+  .chat-input-row input{
+    flex:1; padding:11px 14px; border-radius:100px; border:1.5px solid var(--line); font-size:14px; font-family:'Inter',sans-serif;
+  }
+  .chat-input-row input:focus{ outline:2px solid var(--gold); outline-offset:0; border-color: var(--gold); }
+  .chat-input-row button{
+    background: var(--ink); color:#fff; border:none; width:42px; height:42px; border-radius:50%; font-size:16px;
+  }
+  .chat-input-row button:hover{ background: var(--teal); }
+  .chat-input-row button:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  footer{
+    text-align:center; padding: 32px; font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--ink-dim);
+  }
+
+  @media (max-width: 640px){
+    .onboard-card{ padding:28px 24px; }
+    .detail-head, .detail-body{ padding-left:24px; padding-right:24px; }
+    .chat-panel{ right:16px; bottom:88px; }
+    .chat-fab{ right:16px; }
+  }
+
+  /* ---------- FIELD TRIAL GAME ---------- */
+  .play-btn{
+    width:100%; padding:14px; background: var(--teal); color:#fff; border:none; border-radius:6px;
+    font-weight:600; font-size:14.5px; margin-top:10px;
+  }
+  .play-btn:hover{ background:#256B5C; }
+
+  .game-menu{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-top:10px; }
+  .game-menu-btn{
+    padding:16px 10px; background: var(--panel); border:1.5px solid var(--line); border-radius:8px;
+    text-align:center; transition: all .15s;
+  }
+  .game-menu-btn:hover{ border-color: var(--teal); background:#F3F9F7; }
+  .game-menu-btn .gm-icon{ font-size:22px; display:block; margin-bottom:6px; }
+  .game-menu-btn .gm-label{ font-size:12.5px; font-weight:600; color: var(--ink); }
+
+  /* sort game */
+  .sort-chosen{ display:flex; flex-direction:column; gap:8px; margin-bottom:18px; min-height:20px; }
+  .sort-chosen-item{
+    display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:6px; background: var(--bg);
+    font-size:13.5px; font-weight:500;
+  }
+  .sort-chosen-item .n{
+    width:22px; height:22px; border-radius:50%; background: var(--ink); color:#fff; font-family:'JetBrains Mono', monospace;
+    font-size:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .sort-pool{ display:flex; flex-direction:column; gap:8px; }
+  .sort-pool-btn{
+    text-align:left; padding:12px 14px; border:1.5px solid var(--line); border-radius:6px; background:#fbfcfe; font-size:14px;
+  }
+  .sort-pool-btn:hover{ border-color: var(--gold); }
+  .sort-result-item{ display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:6px; margin-bottom:6px; font-size:13.5px; }
+  .sort-result-item.hit{ background:#EAF4F1; color: var(--teal); font-weight:600; }
+  .sort-result-item.miss{ background:#FBEAEA; color: var(--stamp); font-weight:600; }
+
+  /* match game */
+  .match-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:22px; }
+  .match-col-label{ font-family:'JetBrains Mono', monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color: var(--ink-dim); margin-bottom:10px; }
+  .match-btn{
+    display:block; width:100%; text-align:left; padding:12px 14px; border:1.5px solid var(--line); border-radius:6px;
+    background:#fbfcfe; font-size:13px; margin-bottom:8px; transition: all .15s;
+  }
+  .match-btn:hover:not(:disabled){ border-color: var(--gold); }
+  .match-btn.selected{ border-color: var(--ink); background: var(--bg); }
+  .match-btn.correct{ border-color: var(--teal); background:#EAF4F1; color: var(--teal); font-weight:600; opacity:0.7; }
+  .match-btn.wrong-flash{ border-color: var(--stamp); background:#FBEAEA; }
+  .match-status{ font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--ink-dim); margin-top:14px; text-align:center; }
+
+  .game-overlay{
+    position:fixed; inset:0; background: rgba(22,33,62,0.65); z-index:95;
+    display:flex; justify-content:center; align-items:flex-start; padding: 40px 20px; overflow-y:auto;
+  }
+  .game-overlay.hidden{ display:none; }
+  .game-card{
+    background: var(--panel); max-width: 560px; width:100%; border-radius:8px; overflow:hidden;
+    margin-bottom: 40px; position:relative;
+  }
+  .game-head{
+    background: var(--ink); color:#fff; padding: 28px 32px 22px; position:relative;
+  }
+  .game-close{
+    position:absolute; top:18px; right:18px; background:none; border:1.5px solid rgba(255,255,255,0.3);
+    color:#fff; width:32px; height:32px; border-radius:50%; font-size:15px;
+  }
+  .game-close:hover{ border-color:#fff; }
+  .game-eyebrow{ font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--gold); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px; }
+  .game-head h3{ font-family:'Space Grotesk', sans-serif; font-size:22px; }
+  .game-progress{
+    height:4px; background: rgba(255,255,255,0.15); border-radius:2px; margin-top:16px; overflow:hidden;
+  }
+  .game-progress-bar{ height:100%; background: var(--gold); transition: width .3s; }
+
+  .game-body{ padding: 30px 32px 34px; }
+  .game-question{ font-family:'Space Grotesk', sans-serif; font-size:18px; font-weight:600; margin-bottom:20px; line-height:1.4; }
+  .game-options{ display:flex; flex-direction:column; gap:10px; }
+  .game-option{
+    text-align:left; padding:14px 16px; border:1.5px solid var(--line); border-radius:6px; background:#fbfcfe;
+    font-size:14.5px; transition: all .15s;
+  }
+  .game-option:hover:not(:disabled){ border-color: var(--gold); }
+  .game-option.correct{ border-color: var(--teal); background:#EAF4F1; color: var(--teal); font-weight:600; }
+  .game-option.wrong{ border-color: var(--stamp); background:#FBEAEA; color: var(--stamp); font-weight:600; }
+  .game-option:disabled{ cursor:default; }
+  .game-explain{
+    margin-top:16px; padding:14px 16px; background: var(--bg); border-radius:6px; font-size:13.5px; color: var(--ink-dim);
+  }
+  .game-explain strong{ color: var(--ink); }
+  .game-next{
+    margin-top:18px; width:100%; padding:12px; background: var(--ink); color:#fff; border:none; border-radius:6px;
+    font-weight:600; font-size:14px;
+  }
+  .game-next:hover{ background: var(--teal); }
+
+  .game-result{ text-align:center; }
+  .result-stamp{
+    width:100px; height:100px; border-radius:50%; border:3px solid var(--stamp); color: var(--stamp);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto 22px;
+    transform: rotate(-6deg); font-family:'JetBrains Mono', monospace;
+  }
+  .result-stamp .score-num{ font-size:26px; font-weight:700; line-height:1; }
+  .result-stamp .score-lbl{ font-size:9px; letter-spacing:0.06em; }
+  .result-title{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:600; margin-bottom:10px; }
+  .result-msg{ color: var(--ink-dim); font-size:14.5px; margin-bottom:24px; max-width:400px; margin-left:auto; margin-right:auto; }
+  .result-actions{ display:flex; gap:10px; }
+  .result-actions button{ flex:1; padding:12px; border-radius:6px; font-weight:600; font-size:14px; border:1.5px solid var(--line); background:#fbfcfe; }
+  .result-actions .retry-btn{ background: var(--ink); color:#fff; border:none; }
+  .result-actions .retry-btn:hover{ background: var(--teal); }
+
+  @media (max-width: 640px){
+    .game-head, .game-body{ padding-left:22px; padding-right:22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div class="overlay" id="onboardOverlay">
+  <div class="onboard-card">
+    <span class="stamp-mark">ENTRY PASS</span>
+    <div class="onboard-eyebrow">Before we begin</div>
+    <h2>Let's chart your starting point.</h2>
+    <p class="onboard-sub">A couple of quick details so career paths and advice are matched to where you actually are right now.</p>
+
+    <div class="field">
+      <label for="inpName">Your name</label>
+      <input type="text" id="inpName" placeholder="e.g. Priya">
+    </div>
+
+    <div class="field">
+      <label>You are currently in</label>
+      <div class="stage-toggle">
+        <button type="button" id="btnSchool" class="active" onclick="setStage('school')">School</button>
+        <button type="button" id="btnCollege" onclick="setStage('college')">College</button>
+        <button type="button" id="btnWorking" onclick="setStage('working')">Working</button>
+      </div>
+    </div>
+
+    <div class="field" id="fieldAge">
+      <label for="inpAge">Age</label>
+      <input type="number" id="inpAge" placeholder="e.g. 16" min="5" max="80">
+    </div>
+
+    <div class="field" id="fieldSchool">
+      <label for="inpClass">Class</label>
+      <select id="inpClass">
+        <option>Class 6</option><option>Class 7</option><option>Class 8</option>
+        <option>Class 9</option><option>Class 10</option><option>Class 11</option><option selected>Class 12</option>
+      </select>
+    </div>
+
+    <div class="field" id="fieldCollege" style="display:none;">
+      <label for="inpCourse">College / course</label>
+      <input type="text" id="inpCourse" placeholder="e.g. B.Sc Computer Science, 2nd year">
+    </div>
+
+    <div class="field" id="fieldWorkRole" style="display:none;">
+      <label for="inpWorkRole">Current role</label>
+      <input type="text" id="inpWorkRole" placeholder="e.g. Junior accountant, exploring a switch">
+    </div>
+
+    <button class="btn-primary" onclick="finishOnboarding()">Show me my atlas</button>
+    <button class="skip-link" onclick="finishOnboarding(true)">Skip for now</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="brand"><span class="dot"></span> SkillSphere</div>
+    <div class="profile-chip" id="profileChip">
+      <span id="profileText"></span>
+      <button onclick="openOnboarding()">Edit</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO + SEARCH -->
+<header class="hero wrap">
+  <div class="hero-eyebrow">SkillSphere — Rev. 2026</div>
+  <h1 class="hero-title">Search any career. See the whole path, beginning to end.</h1>
+  <p class="hero-sub">Not just a job title — the subjects to pick, the exams to clear, the years it takes, and the real problems people hit along the way.</p>
+
+  <div class="search-row">
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search a career — e.g. doctor, designer, data scientist..." oninput="renderCards()">
+    </div>
+  </div>
+
+  <div class="chips" id="categoryChips"></div>
+</header>
+
+<main class="wrap">
+  <div class="results-label" id="resultsLabel">All careers</div>
+  <div class="card-grid" id="cardGrid"></div>
+</main>
+
+<footer>© 2026 SkillSphere — built to help you decide, not decide for you.</footer>
+
+<!-- DETAIL MODAL -->
+<div class="detail-overlay hidden" id="detailOverlay" onclick="if(event.target===this) closeDetail()">
+  <div class="detail-card" id="detailCard"></div>
+</div>
+
+<!-- FIELD TRIAL GAME -->
+<div class="game-overlay hidden" id="gameOverlay" onclick="if(event.target===this) closeGame()">
+  <div class="game-card" id="gameCard"></div>
+</div>
+
+<!-- CHAT WIDGET -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Open career advisor chat">💬</button>
+<div class="chat-panel hidden" id="chatPanel">
+  <div class="chat-head">
+    <div>
+      <div class="t">Career Advisor</div>
+      <div class="s">ask me anything</div>
+    </div>
+    <button onclick="toggleChat()" aria-label="Close chat">✕</button>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Ask about a career, exam, or a problem you're facing..." onkeydown="if(event.key==='Enter') sendChat()">
+    <button id="chatSendBtn" onclick="sendChat()" aria-label="Send">→</button>
+  </div>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const CAREERS = [
+  {
+    id:"software-engineer", name:"Software Engineer", cat:"Technology", code:"SWE",
+    overview:"Designs and builds the applications, websites, and systems that run on computers and phones. Work ranges from consumer apps to the infrastructure behind banks, hospitals, and airlines.",
+    path:[
+      {stage:"School", age:"14–18", title:"Build a base in maths & logic", desc:"Focus on Mathematics and Computer Science if offered. Basic coding (Python, Scratch) helps but isn't required yet."},
+      {stage:"Entrance", age:"17–18", title:"Undergraduate entrance exams", desc:"Exams like JEE (India) or standard college applications elsewhere, for a B.Tech/B.E/B.Sc in Computer Science or a related field."},
+      {stage:"College", age:"18–22", title:"Computer Science degree", desc:"4-year degree covering programming, data structures, systems, and at least one real internship in the final two years."},
+      {stage:"Entry job", age:"22–24", title:"Junior / Associate Engineer", desc:"First 1–2 years focus on learning a codebase, writing tested code, and working inside a team's review process."},
+      {stage:"Growth", age:"25–30", title:"Mid-level / Senior Engineer", desc:"Owns larger features end-to-end, mentors juniors, makes technical decisions."},
+      {stage:"Mastery", age:"30+", title:"Staff Engineer / Engineering Manager", desc:"Either goes deep as a technical specialist or moves into leading teams and setting direction."}
+    ],
+    education:"B.Tech/B.E/B.Sc in Computer Science or Software Engineering (4 years). A master's is optional and mainly useful for research or specialised roles.",
+    skills:["Problem-solving","Programming (Python/JS/Java)","Data structures & algorithms","Communication","Debugging patience"],
+    challenges:[
+      {p:"The field changes fast — tools you learn today may be outdated in 3–4 years.", f:"Learn fundamentals (data structures, systems thinking) deeply — these transfer across tools. Treat specific frameworks as replaceable."},
+      {p:"Coding interviews are a separate skill from the actual job.", f:"Practice interview-style problems (arrays, trees, algorithms) consistently for months before applying, not just the week before."},
+      {p:"Burnout from long hours, especially at fast-growing companies.", f:"Set boundaries early in your career — it's easier to protect time before overtime becomes 'normal' at a job."}
+    ],
+    salary:"₹4–8 LPA entry level, ₹15–40+ LPA at senior levels in India (figures vary widely by company and country).",
+    day:"Mornings often spent on focused coding, afternoons in meetings, code reviews, and unblocking teammates."
+  },
+  {
+    id:"doctor", name:"Doctor (MBBS)", cat:"Medicine", code:"MED",
+    overview:"Diagnoses and treats illness and injury. One of the longest and most rigorous education paths, but also one of the most stable and respected professions worldwide.",
+    path:[
+      {stage:"School", age:"14–18", title:"Biology, Chemistry, Physics focus", desc:"Science stream is compulsory. Strong performance in Class 11–12 boards and dedicated exam prep matters a lot here."},
+      {stage:"Entrance", age:"17–18", title:"Medical entrance exam", desc:"Exams like NEET (India), MCAT (US), or equivalent — usually the single hardest gate in this entire path."},
+      {stage:"College", age:"18–23", title:"MBBS degree", desc:"5.5 years including a compulsory 1-year rotating internship across hospital departments."},
+      {stage:"Specialisation", age:"23–26", title:"Postgraduate exam & residency", desc:"Optional but common: another competitive exam (NEET-PG) followed by 2–3 years of specialised residency (e.g. cardiology, surgery)."},
+      {stage:"Entry practice", age:"25–28", title:"Junior doctor / resident", desc:"Long hospital shifts, direct patient care under supervision, building diagnostic judgment."},
+      {stage:"Mastery", age:"30+", title:"Consultant / Specialist", desc:"Independent practice, often in a specialised field, sometimes combined with teaching or research."}
+    ],
+    education:"MBBS (5.5 years) minimum. Specialisation (MD/MS) adds 3 more years and is close to essential for higher-paying roles.",
+    skills:["Scientific reasoning","Composure under pressure","Communication with patients","Long-term stamina","Attention to detail"],
+    challenges:[
+      {p:"Entrance exam competition is extremely high — many capable students don't get a seat on the first attempt.", f:"Build a genuine one-year backup plan (repeat attempt or an allied science degree) so one exam doesn't feel like the only door."},
+      {p:"The training years involve long, exhausting hospital shifts.", f:"Talk to current residents before committing to a specialisation — workload varies a lot by department."},
+      {p:"It's a long path with no full income until your mid-to-late 20s.", f:"Plan finances (loans, scholarships) early with family, since this is a multi-year investment before any real salary."}
+    ],
+    salary:"Highly variable — junior residents often earn modestly; established specialists and consultants can earn significantly more, especially in private practice.",
+    day:"Rounds with patients, diagnosis and treatment decisions, documentation, and — depending on specialty — surgery or procedures."
+  },
+  {
+    id:"chartered-accountant", name:"Chartered Accountant", cat:"Finance", code:"CA",
+    overview:"Manages financial records, audits, taxation, and business strategy for companies and individuals. A respected, stable path into the finance world without needing an MBA.",
+    path:[
+      {stage:"School", age:"15–18", title:"Commerce stream", desc:"Maths is optional in some countries but strongly recommended. Accountancy and Economics build the base."},
+      {stage:"Foundation", age:"17–19", title:"CA Foundation exam", desc:"Entry-level exam that can be attempted right after Class 12, testing accounting and basic quantitative aptitude."},
+      {stage:"Intermediate", age:"19–21", title:"CA Intermediate + articleship begins", desc:"Deeper accounting, law, and tax papers, alongside starting a mandatory 2–3 year practical training (articleship) under a practicing CA."},
+      {stage:"Final exam", age:"21–23", title:"CA Final", desc:"The last and toughest set of papers, often attempted while completing articleship."},
+      {stage:"Entry job", age:"23–25", title:"Associate / Junior CA", desc:"Works in audit, tax, or advisory at a firm or in a company's finance team."},
+      {stage:"Growth", age:"27+", title:"Manager / Partner / CFO track", desc:"Moves toward leading audits, running a practice, or into senior corporate finance roles."}
+    ],
+    education:"No mandatory undergraduate degree required — the CA program itself (Foundation, Intermediate, Final + articleship) is the qualification, typically taking 4–5 years total.",
+    skills:["Numerical accuracy","Attention to detail","Ethics & judgment","Client communication","Discipline for long self-study"],
+    challenges:[
+      {p:"Pass rates on CA exams are low, and self-study discipline is a major factor.", f:"Build a fixed daily study schedule from the start rather than relying on last-minute intensity — this exam rewards consistency."},
+      {p:"Articleship stipends are low relative to the workload.", f:"Treat articleship as an investment in experience and mentorship, not income — most of the financial upside comes after qualifying."},
+      {p:"Balancing articleship work with exam preparation is genuinely difficult.", f:"Talk to your principal (mentor) early about study leave — most firms expect and accommodate exam prep time."}
+    ],
+    salary:"₹6–10 LPA at qualification, rising substantially with experience, specialisation, or moving into industry (CFO-track) roles.",
+    day:"A mix of client meetings, ledger and compliance review, and — during exam years — evening study.",
+  },
+  {
+    id:"graphic-designer", name:"Graphic Designer", cat:"Creative", code:"GD",
+    overview:"Creates visual content — branding, layouts, packaging, digital and print design — that communicates a message clearly and looks intentional.",
+    path:[
+      {stage:"School", age:"14–18", title:"Build a portfolio habit", desc:"No specific stream required. Start making things — posters, logos, edits — even informally, and save every piece."},
+      {stage:"Entrance", age:"17–18", title:"Design entrance exam or direct admission", desc:"Exams like UCEED/NID (India) for top design schools, or portfolio-based admission at many other colleges."},
+      {stage:"College", age:"18–22", title:"Design degree or diploma", desc:"3–4 year program (or shorter diploma) covering visual design fundamentals, typography, and software tools."},
+      {stage:"Entry job", age:"21–24", title:"Junior Designer", desc:"Works under a creative director or senior designer, executing briefs and learning client/brand constraints."},
+      {stage:"Growth", age:"25–30", title:"Senior Designer / Art Director", desc:"Leads design direction for projects or brands, manages junior designers."},
+      {stage:"Mastery", age:"30+", title:"Creative Director / Studio owner", desc:"Sets overall creative vision, or runs an independent studio/freelance practice."}
+    ],
+    education:"A design degree helps but isn't always mandatory — a strong portfolio can substitute for formal credentials in this field more than most.",
+    skills:["Visual composition","Typography","Software (Figma, Adobe suite)","Client communication","Taking feedback well"],
+    challenges:[
+      {p:"It's hard to prove skill without a portfolio, but hard to build a portfolio without work.", f:"Take on small personal or non-profit projects early purely to build a body of work you can show."},
+      {p:"Clients often ask for endless revisions or vague feedback like 'make it pop'.", f:"Learn to ask specific questions upfront (audience, purpose, references) — this prevents most revision loops."},
+      {p:"Freelance income can be unpredictable, especially early on.", f:"Consider a stable junior role first to build both skill and a client network before going independent."}
+    ],
+    salary:"₹3–6 LPA entry level, scaling well with experience, specialisation, or a freelance/studio client base.",
+    day:"Blocks of focused design work interspersed with client calls and feedback rounds."
+  },
+  {
+    id:"civil-engineer", name:"Civil Engineer", cat:"Engineering", code:"CE",
+    overview:"Designs, builds, and maintains the physical infrastructure around us — roads, buildings, bridges, and water systems.",
+    path:[
+      {stage:"School", age:"14–18", title:"Physics, Chemistry, Maths", desc:"Standard science stream. Strong spatial reasoning and maths ability matter for structural work later."},
+      {stage:"Entrance", age:"17–18", title:"Engineering entrance exam", desc:"JEE or state-level entrance exams (India) or standard university admission elsewhere."},
+      {stage:"College", age:"18–22", title:"B.Tech/B.E in Civil Engineering", desc:"4-year degree covering structures, materials, surveying, and project management, usually with a final-year project."},
+      {stage:"Entry job", age:"22–25", title:"Site Engineer / Design Engineer", desc:"Works on active construction sites or in a design office under a senior engineer's supervision."},
+      {stage:"Growth", age:"26–32", title:"Project Engineer / Manager", desc:"Takes ownership of full projects, budgets, and teams."},
+      {stage:"Mastery", age:"32+", title:"Chief Engineer / Consultant", desc:"Leads major infrastructure projects or runs an independent consultancy."}
+    ],
+    education:"B.Tech/B.E in Civil Engineering (4 years). A licence or chartered status is often required for signing off on structural designs.",
+    skills:["Structural reasoning","Project management","Software (AutoCAD, STAAD)","Site coordination","Safety judgment"],
+    challenges:[
+      {p:"Early site roles often mean remote postings and physically demanding conditions.", f:"Ask specifically about posting locations during interviews — this varies a lot between companies."},
+      {p:"Project delays and budget pressure from all sides (clients, contractors, regulators) are constant.", f:"Build negotiation and documentation habits early — a clear paper trail protects you when disputes happen."},
+      {p:"Safety responsibility is real and can be stressful.", f:"Never skip safety protocol under deadline pressure — it's the one non-negotiable in this field."}
+    ],
+    salary:"₹3.5–6 LPA entry level, rising to ₹15–25+ LPA for experienced project leads or consultants.",
+    day:"Time split between site visits, drawing/design review, and coordination meetings with contractors."
+  },
+  {
+    id:"data-scientist", name:"Data Scientist", cat:"Technology", code:"DS",
+    overview:"Finds patterns in data to help organisations make decisions — from what customers might buy next to predicting equipment failure.",
+    path:[
+      {stage:"School", age:"14–18", title:"Maths & statistics focus", desc:"Strong grounding in maths, especially statistics and probability, pays off enormously later."},
+      {stage:"Entrance", age:"17–18", title:"Undergraduate admission", desc:"A degree in Computer Science, Statistics, Maths, or Engineering — no single required path here."},
+      {stage:"College", age:"18–22", title:"Bachelor's degree + electives", desc:"Take statistics, linear algebra, and programming electives regardless of your main major."},
+      {stage:"Specialisation", age:"22–24", title:"Master's or self-taught specialisation", desc:"Many (not all) data scientists add a master's in Data Science/Statistics, or build skill through projects and certifications."},
+      {stage:"Entry job", age:"23–26", title:"Junior Data Analyst / Scientist", desc:"Works on cleaning data, building models, and communicating findings under a senior scientist."},
+      {stage:"Growth", age:"27+", title:"Senior / Lead Data Scientist", desc:"Owns entire modelling pipelines, mentors juniors, and shapes what questions the business asks of its data."}
+    ],
+    education:"Bachelor's in a quantitative field is the minimum; many roles (especially research-heavy ones) prefer a master's.",
+    skills:["Statistics","Python/R programming","Communicating findings clearly","Domain curiosity","Data cleaning patience"],
+    challenges:[
+      {p:"Most real-world time goes into cleaning messy data, not building exciting models.", f:"Go in expecting this — treat data cleaning as a core skill to get efficient at, not a chore to rush through."},
+      {p:"It's easy to build a technically correct model that answers the wrong business question.", f:"Always clarify the actual decision your analysis needs to support before building anything."},
+      {p:"The field has a lot of buzzwords and overlapping job titles, which makes career planning confusing.", f:"Focus on the underlying skills (statistics, programming) rather than chasing the trendiest title."}
+    ],
+    salary:"₹6–12 LPA entry level, ₹20–40+ LPA for experienced specialists, especially in tech-heavy industries.",
+    day:"Querying data, building and testing models, and presenting findings to non-technical stakeholders."
+  },
+  {
+    id:"lawyer", name:"Lawyer", cat:"Law", code:"LAW",
+    overview:"Advises and represents individuals, businesses, or the state on legal matters — from contracts to courtroom litigation.",
+    path:[
+      {stage:"School", age:"14–18", title:"Any stream works", desc:"Strong reading comprehension, writing, and debate/argumentation skills matter more than a specific subject stream."},
+      {stage:"Entrance", age:"17–18", title:"Law entrance exam", desc:"Exams like CLAT (India) or equivalent for a 5-year integrated law degree, or a shorter 3-year LLB after any bachelor's."},
+      {stage:"College", age:"18–23", title:"Law degree (BA LLB or LLB)", desc:"5-year integrated degree (after Class 12) or 3-year degree (after any bachelor's), including moot courts and internships."},
+      {stage:"Bar exam", age:"22–23", title:"Bar Council enrollment exam", desc:"A licensing exam required to practise law after graduating."},
+      {stage:"Entry job", age:"23–26", title:"Junior Associate", desc:"Works under a senior lawyer or in a law firm's litigation or corporate team, learning case handling."},
+      {stage:"Growth", age:"28+", title:"Senior Associate / Partner / Independent practice", desc:"Builds a specialisation and own client base, or rises within a firm's partnership track."}
+    ],
+    education:"5-year integrated law degree (BA LLB) after school, or a 3-year LLB after any bachelor's degree. Bar exam required to practise.",
+    skills:["Argumentation","Research & writing","Reading dense material carefully","Negotiation","Composure under scrutiny"],
+    challenges:[
+      {p:"Early years often mean long hours for modest pay, especially in litigation.", f:"Choose your first firm/mentor for what you'll learn, not just the pay — the right mentor accelerates everything later."},
+      {p:"Building a client base (for independent practice) can take years.", f:"Start building a professional network and reputation from your internships onward, not after graduating."},
+      {p:"The field is intensely competitive at top firms and courts.", f:"Identify a specialisation (tax, IP, corporate, criminal) early — depth in one area stands out more than general competence."}
+    ],
+    salary:"₹4–8 LPA entry level at firms, significantly higher at top corporate firms; independent practice income varies widely.",
+    day:"Case research, drafting documents, client meetings, and — for litigators — court appearances.",
+  },
+  {
+    id:"psychologist", name:"Psychologist", cat:"Healthcare", code:"PSY",
+    overview:"Studies behaviour and mental processes to help people manage mental health, relationships, or workplace and learning challenges.",
+    path:[
+      {stage:"School", age:"14–18", title:"Any stream, Psychology if offered", desc:"Psychology as a Class 11–12 subject helps but isn't mandatory. Strong listening and writing skills matter."},
+      {stage:"College", age:"18–21", title:"Bachelor's in Psychology", desc:"3-year degree covering theory, research methods, and an introduction to clinical concepts."},
+      {stage:"Specialisation", age:"21–23", title:"Master's in Psychology", desc:"Required for most practising roles — a chance to specialise in clinical, counselling, or organisational psychology."},
+      {stage:"Supervised practice", age:"23–25", title:"Registered internship/training", desc:"Supervised clinical hours are usually mandatory before independent practice, especially for clinical roles."},
+      {stage:"Entry job", age:"24–27", title:"Counsellor / Junior Psychologist", desc:"Works in a school, hospital, or clinic under supervision, building a caseload."},
+      {stage:"Mastery", age:"28+", title:"Independent practice / Specialist", desc:"Runs a private practice or specialises further (e.g. child psychology, trauma)."}
+    ],
+    education:"Bachelor's (3 years) + Master's (2 years) in Psychology at minimum; clinical roles often need further supervised registration.",
+    skills:["Active listening","Empathy with boundaries","Pattern recognition in behaviour","Confidentiality & ethics","Emotional resilience"],
+    challenges:[
+      {p:"It's emotionally demanding work — absorbing others' distress regularly.", f:"Personal therapy or regular supervision for yourself isn't optional in this field — it's a professional necessity, not a weakness."},
+      {p:"Building a client base or getting hired often needs a specific specialisation.", f:"Pick a focus area (children, addiction, workplace) during your master's rather than staying fully general."},
+      {p:"Mental health stigma can make people hesitant to seek help, affecting demand in some regions.", f:"Community and school-based roles are often steadier starting points than purely private practice."}
+    ],
+    salary:"₹3–6 LPA entry level in clinics/schools, with independent practice income scaling with reputation and specialisation.",
+    day:"Back-to-back client sessions, case notes, and — for those in institutions — team consultations."
+  },
+  {
+    id:"journalist", name:"Journalist", cat:"Media", code:"JRN",
+    overview:"Researches, verifies, and reports news and stories across print, TV, radio, or digital platforms.",
+    path:[
+      {stage:"School", age:"14–18", title:"Reading, writing, current affairs", desc:"No specific stream needed. Strong writing and a genuine habit of following news matter most."},
+      {stage:"College", age:"18–21", title:"Bachelor's in Journalism/Mass Comm or any field", desc:"A journalism degree helps but many successful journalists come from other fields with a strong writing portfolio."},
+      {stage:"Specialisation", age:"21–23", title:"Optional master's + internships", desc:"A master's in journalism can help at competitive outlets; hands-on internship experience often matters more."},
+      {stage:"Entry job", age:"22–25", title:"Junior Reporter / Correspondent", desc:"Covers smaller beats or local stories, builds sourcing skills, learns editorial standards under an editor."},
+      {stage:"Growth", age:"26–32", title:"Senior Reporter / Editor", desc:"Covers major beats independently, or moves into editorial/managerial work."},
+      {stage:"Mastery", age:"32+", title:"Senior Editor / Columnist / Bureau Chief", desc:"Shapes coverage direction or becomes a recognised voice in a specific beat."}
+    ],
+    education:"A bachelor's degree in any field is workable; Journalism/Mass Communication degrees or a strong published portfolio both open doors.",
+    skills:["Clear writing","Fact-checking rigor","Interviewing","Handling deadline pressure","Ethical judgment"],
+    challenges:[
+      {p:"Entry-level pay is often low relative to the workload and hours.", f:"Freelancing on the side for multiple outlets early on can supplement income while building a byline portfolio."},
+      {p:"Misinformation pressure and tight deadlines can tempt shortcuts on verification.", f:"Build a personal rule of always double-sourcing before publishing — your credibility is the entire asset in this career."},
+      {p:"The industry is undergoing constant structural change (print to digital, layoffs).", f:"Build digital skills (multimedia storytelling, social distribution) alongside traditional reporting skills."}
+    ],
+    salary:"₹2.5–5 LPA entry level, rising with reputation, beat expertise, or a move into editorial leadership.",
+    day:"Source calls, fieldwork or interviews, writing under deadline, and editorial back-and-forth."
+  },
+  {
+    id:"entrepreneur", name:"Entrepreneur / Founder", cat:"Business", code:"ENT",
+    overview:"Builds a business from an idea — identifying a problem, building a solution, and finding people willing to pay for it.",
+    path:[
+      {stage:"School", age:"14–18", title:"Build things, take small risks", desc:"No fixed subject path. Side projects, small sales experiments, or clubs build the instinct early."},
+      {stage:"College", age:"18–22", title:"Any degree + real-world exposure", desc:"The degree matters less than internships, projects, or a first small venture attempted during this time."},
+      {stage:"First job (often)", age:"22–26", title:"Work inside an industry first", desc:"Many founders spend a few years learning an industry from inside a company before starting their own venture."},
+      {stage:"First venture", age:"25–30", title:"Launch & validate", desc:"Builds a first version, tests it with real users, and learns primarily from what fails."},
+      {stage:"Growth", age:"30+", title:"Scale or pivot", desc:"Either grows the working version into a larger business, or applies the lessons to a next attempt."},
+      {stage:"Mastery", age:"35+", title:"Serial founder / Investor", desc:"Builds multiple ventures, or shifts into mentoring and investing in newer founders."}
+    ],
+    education:"No fixed requirement — a business or relevant industry degree helps, but execution ability and resilience matter more than credentials here.",
+    skills:["Resilience to failure","Sales & persuasion","Resourcefulness","Hiring & delegation","Financial basics"],
+    challenges:[
+      {p:"Most new ventures fail, often more than once, before one works.", f:"Treat early failures as expensive but necessary tuition — the goal is to fail cheaply and learn fast, not to avoid failing."},
+      {p:"Income is unpredictable, especially in the first few years.", f:"Keep personal expenses low and, where possible, build some savings runway before going all-in."},
+      {p:"It's easy to build something nobody actually wants to pay for.", f:"Talk to potential customers before building anything — validate the problem, not just the idea."}
+    ],
+    salary:"Highly variable — many founders earn little to nothing for years; a small fraction see large financial upside if the venture succeeds.",
+    day:"A mix of building the product, talking to customers, hiring, and managing finances — the mix shifts constantly."
+  },
+  {
+    id:"teacher", name:"Teacher", cat:"Education", code:"TCH",
+    overview:"Educates students in a subject or age group, shaping how they think and what they believe is possible for themselves.",
+    path:[
+      {stage:"School", age:"14–18", title:"Pick subjects you'd enjoy teaching", desc:"Any stream works, though strength in the subject you plan to teach later matters most."},
+      {stage:"College", age:"18–21", title:"Bachelor's degree in a subject", desc:"A subject-specific bachelor's degree (Science, Arts, Commerce) is the usual first step."},
+      {stage:"Teaching qualification", age:"21–23", title:"B.Ed or teaching certification", desc:"A dedicated teaching qualification, required in most schools before you can be hired full-time."},
+      {stage:"Entry job", age:"23–26", title:"Junior/Assistant Teacher", desc:"Teaches under a head of department, builds classroom management and lesson planning skills."},
+      {stage:"Growth", age:"27–35", title:"Senior Teacher / Head of Department", desc:"Leads a subject department, mentors newer teachers, may take on curriculum design."},
+      {stage:"Mastery", age:"35+", title:"Vice Principal / Principal", desc:"Moves into school leadership and administration, or becomes a recognised subject specialist."}
+    ],
+    education:"Bachelor's degree in the subject you want to teach, plus a B.Ed or equivalent teaching certification.",
+    skills:["Explaining clearly","Patience","Classroom management","Empathy","Adaptability"],
+    challenges:[
+      {p:"Large class sizes make it hard to give individual students attention.", f:"Use small-group or peer-learning techniques so stronger students help reinforce weaker ones' understanding."},
+      {p:"Pay is often lower relative to the responsibility involved.", f:"Look at government/public school postings and additional certifications, which often pay better than many private options."},
+      {p:"Keeping students engaged when interest is low is a constant challenge.", f:"Tie lessons to real examples students already care about rather than relying purely on the textbook."}
+    ],
+    salary:"₹2.5–5 LPA entry level, higher in government schools with experience, or in senior leadership roles.",
+    day:"Classes, lesson planning, grading, and occasional parent or staff meetings."
+  },
+  {
+    id:"nurse", name:"Nurse", cat:"Healthcare", code:"RN",
+    overview:"Provides direct patient care, monitors health, and supports doctors — often the person patients interact with most in a hospital.",
+    path:[
+      {stage:"School", age:"14–18", title:"Biology-focused science stream", desc:"Biology is important; Chemistry and Physics are commonly required too."},
+      {stage:"Entrance", age:"17–18", title:"Nursing entrance exam or direct admission", desc:"Many colleges admit directly based on Class 12 science marks; some require an entrance test."},
+      {stage:"College", age:"18–22", title:"B.Sc Nursing (or GNM diploma)", desc:"4-year degree (or 3-year diploma) covering clinical training across hospital departments."},
+      {stage:"Licensing", age:"22–23", title:"Nursing council registration", desc:"Registration with the state/national nursing council is required to practise."},
+      {stage:"Entry job", age:"22–25", title:"Staff Nurse", desc:"Works in a hospital ward or unit, handling direct patient care under a senior nurse or doctor."},
+      {stage:"Growth", age:"27+", title:"Senior Nurse / Nurse Practitioner", desc:"Specialises (ICU, paediatric, surgical) or moves into nursing education and management."}
+    ],
+    education:"B.Sc Nursing (4 years) or GNM diploma (3 years), followed by nursing council registration.",
+    skills:["Clinical care","Composure under pressure","Communication with patients","Attention to detail","Physical stamina"],
+    challenges:[
+      {p:"Shift work, including nights, is physically and mentally demanding.", f:"Build a consistent sleep and recovery routine early — this job rewards those who protect their own health too."},
+      {p:"Emotional toll from patient suffering or loss is real and frequent.", f:"Use hospital debriefs or peer support systems rather than carrying it alone after difficult shifts."},
+      {p:"Nurse-to-patient ratios are sometimes stretched thin, increasing pressure.", f:"Prioritise ruthlessly and flag safety concerns to supervisors rather than trying to absorb an unsafe workload silently."}
+    ],
+    salary:"₹2–4.5 LPA entry level, rising with specialisation, experience, or roles abroad.",
+    day:"Patient rounds, administering medication, monitoring vitals, and coordinating with doctors."
+  },
+  {
+    id:"pharmacist", name:"Pharmacist", cat:"Healthcare", code:"PHM",
+    overview:"Dispenses medication, advises on drug interactions, and is often the most accessible healthcare professional for everyday health questions.",
+    path:[
+      {stage:"School", age:"14–18", title:"Biology and Chemistry focus", desc:"Science stream with strong Chemistry is the standard preparation."},
+      {stage:"Entrance", age:"17–18", title:"Pharmacy entrance or direct admission", desc:"Some states require an entrance exam; others admit directly on Class 12 marks."},
+      {stage:"College", age:"18–22", title:"B.Pharm degree", desc:"4-year degree covering pharmacology, chemistry, and pharmaceutical law, with practical training."},
+      {stage:"Licensing", age:"22–23", title:"Pharmacy council registration", desc:"Registration is required before practising or dispensing medication independently."},
+      {stage:"Entry job", age:"22–25", title:"Retail or Hospital Pharmacist", desc:"Works in a pharmacy or hospital dispensary, handling prescriptions and patient advice."},
+      {stage:"Growth", age:"27+", title:"Pharmacy Manager / Clinical Pharmacist", desc:"Manages a pharmacy, specialises clinically, or moves into pharmaceutical industry roles."}
+    ],
+    education:"B.Pharm (4 years), followed by pharmacy council registration to practise.",
+    skills:["Chemistry knowledge","Attention to detail","Client communication","Ethics & judgment","Record-keeping accuracy"],
+    challenges:[
+      {p:"A single dispensing error can seriously harm a patient.", f:"Build a personal double-check habit for every prescription, regardless of how busy the pharmacy is."},
+      {p:"Retail pharmacy work can involve long, repetitive hours on your feet.", f:"Hospital or industry roles offer different working conditions if retail hours don't suit you long-term."},
+      {p:"Patients sometimes push for medication you're not comfortable dispensing.", f:"Rely on protocol and referral to a doctor rather than being pressured into a judgment call outside your role."}
+    ],
+    salary:"₹2–4 LPA entry level, higher in hospital or pharmaceutical industry roles with experience.",
+    day:"Dispensing prescriptions, advising customers or patients, and inventory/record management."
+  },
+  {
+    id:"architect", name:"Architect", cat:"Design", code:"ARC",
+    overview:"Designs buildings and spaces, balancing how they look, how they function, and whether they can actually be built within budget.",
+    path:[
+      {stage:"School", age:"14–18", title:"Maths, Physics, and drawing practice", desc:"Science stream with Maths is required; developing a drawing/sketching habit helps a lot for entrance tests."},
+      {stage:"Entrance", age:"17–18", title:"Architecture entrance exam", desc:"Exams like NATA (India) test drawing, spatial reasoning, and aptitude alongside academics."},
+      {stage:"College", age:"18–23", title:"B.Arch degree", desc:"5-year degree covering design studios, structures, and a final thesis project."},
+      {stage:"Licensing", age:"23–24", title:"Council of Architecture registration", desc:"Registration is required to practise and sign off on architectural drawings."},
+      {stage:"Entry job", age:"23–26", title:"Junior Architect", desc:"Works under a senior architect on design development and site drawings."},
+      {stage:"Mastery", age:"30+", title:"Principal Architect / Studio owner", desc:"Leads projects independently or runs their own architecture practice."}
+    ],
+    education:"B.Arch (5 years) followed by Council of Architecture registration to practise professionally.",
+    skills:["Spatial reasoning","Visual composition","Software (AutoCAD, Revit)","Client communication","Project management"],
+    challenges:[
+      {p:"Client vision and budget constraints often clash with design ideals.", f:"Present 2–3 design options at different budget levels early, rather than one ideal design that gets rejected outright."},
+      {p:"Early career pay is modest relative to the years of training required.", f:"Build a varied portfolio (residential, commercial, interiors) early to open more job options."},
+      {p:"Regulatory approvals and building codes can slow projects significantly.", f:"Learn local building regulations thoroughly — this knowledge itself becomes a valuable, billable skill."}
+    ],
+    salary:"₹3–6 LPA entry level, rising well for principal architects or successful independent practices.",
+    day:"Design work, client meetings, site visits, and coordination with engineers and contractors."
+  },
+  {
+    id:"mechanical-engineer", name:"Mechanical Engineer", cat:"Engineering", code:"ME",
+    overview:"Designs, builds, and maintains machines and mechanical systems — from car engines to factory equipment to HVAC systems.",
+    path:[
+      {stage:"School", age:"14–18", title:"Physics, Chemistry, Maths", desc:"Standard science stream; strong Physics and Maths matter most for this field."},
+      {stage:"Entrance", age:"17–18", title:"Engineering entrance exam", desc:"JEE or state-level entrance exams (India), or standard university admission elsewhere."},
+      {stage:"College", age:"18–22", title:"B.Tech/B.E in Mechanical Engineering", desc:"4-year degree covering thermodynamics, manufacturing, and machine design, with a final-year project."},
+      {stage:"Entry job", age:"22–25", title:"Graduate Engineer Trainee / Design Engineer", desc:"Works on manufacturing floors or in design teams under senior engineer supervision."},
+      {stage:"Growth", age:"26–32", title:"Senior Design/Project Engineer", desc:"Leads design or production projects, manages junior engineers."},
+      {stage:"Mastery", age:"32+", title:"Chief Engineer / Plant Manager", desc:"Oversees entire product lines or manufacturing operations."}
+    ],
+    education:"B.Tech/B.E in Mechanical Engineering (4 years); a master's helps for R&D-heavy roles.",
+    skills:["Mechanical reasoning","CAD software","Problem-solving","Manufacturing knowledge","Project management"],
+    challenges:[
+      {p:"Entry-level roles are sometimes in factory settings far from major cities.", f:"Ask specifically about posting locations and rotation policies during interviews."},
+      {p:"The field spans many specialisations (automotive, aerospace, HVAC), which can feel overwhelming to choose between.", f:"Use internships to sample 2–3 specialisations before committing to one for your first full-time role."},
+      {p:"Manufacturing deadlines can create sustained high-pressure periods.", f:"Build strong documentation habits so issues can be traced and fixed quickly rather than causing repeated firefighting."}
+    ],
+    salary:"₹3.5–6 LPA entry level, rising to ₹15–20+ LPA for experienced engineers in core or specialised industries.",
+    day:"Design work or floor supervision, testing, and coordination with production and quality teams."
+  },
+  {
+    id:"electrical-engineer", name:"Electrical Engineer", cat:"Engineering", code:"EE",
+    overview:"Designs and maintains electrical systems — from power grids and home wiring to the circuits inside electronic devices.",
+    path:[
+      {stage:"School", age:"14–18", title:"Physics and Maths focus", desc:"Standard science stream; comfort with circuits and abstract maths is a strong sign for this field."},
+      {stage:"Entrance", age:"17–18", title:"Engineering entrance exam", desc:"JEE or state-level entrance exams (India), or standard university admission elsewhere."},
+      {stage:"College", age:"18–22", title:"B.Tech/B.E in Electrical Engineering", desc:"4-year degree covering circuits, power systems, and control systems, with a final-year project."},
+      {stage:"Entry job", age:"22–25", title:"Graduate Engineer / Field Engineer", desc:"Works on power systems, electronics design, or field installations under senior guidance."},
+      {stage:"Growth", age:"26–32", title:"Senior/Project Engineer", desc:"Leads projects in power distribution, automation, or electronics design."},
+      {stage:"Mastery", age:"32+", title:"Chief Engineer / Consultant", desc:"Leads major infrastructure or product design projects."}
+    ],
+    education:"B.Tech/B.E in Electrical Engineering (4 years); professional licensing may be needed for signing off on some projects.",
+    skills:["Circuit analysis","Problem-solving","Safety judgment","CAD/simulation software","Project coordination"],
+    challenges:[
+      {p:"Working with live electrical systems carries genuine safety risk.", f:"Never bypass lockout/safety protocols under time pressure — this is the one area with zero acceptable shortcuts."},
+      {p:"The field spans very different paths (power systems vs. electronics vs. automation).", f:"Use early internships to figure out which specialisation actually interests you before specialising further."},
+      {p:"Fieldwork can mean travel to remote sites or installations.", f:"Clarify travel expectations upfront if a stable location matters to you."}
+    ],
+    salary:"₹3.5–6 LPA entry level, rising to ₹15–25+ LPA for senior engineers or specialised consultants.",
+    day:"Circuit or system design, testing, and site visits or lab work depending on specialisation."
+  },
+  {
+    id:"civil-services", name:"IAS / Civil Services Officer", cat:"Government", code:"IAS",
+    overview:"Administers government policy and public services at the district, state, or national level — one of the most competitive and respected government career paths.",
+    path:[
+      {stage:"School", age:"14–18", title:"Any stream, strong general knowledge", desc:"No fixed stream required. Building a habit of reading widely (current affairs, history, economy) helps enormously later."},
+      {stage:"College", age:"18–21", title:"Any bachelor's degree", desc:"Any graduate degree qualifies you to sit the civil services exam — the subject matters less than the degree itself."},
+      {stage:"Exam preparation", age:"21–26", title:"UPSC Civil Services Exam", desc:"A three-stage exam (Prelims, Mains, Interview) that most candidates prepare for over 1–3 years."},
+      {stage:"Training", age:"24–27", title:"Foundation training", desc:"Selected candidates undergo structured training (e.g. at LBSNAA in India) before their first posting."},
+      {stage:"Entry posting", age:"25–28", title:"Assistant Collector / Sub-Divisional Officer", desc:"First field posting, handling real administrative responsibility early."},
+      {stage:"Growth", age:"35+", title:"District Collector / Secretary-level roles", desc:"Progresses to larger administrative jurisdictions and senior policy roles over a career."}
+    ],
+    education:"Any bachelor's degree, followed by clearing the national civil services examination (a separate multi-year process from formal education).",
+    skills:["General knowledge","Writing under time pressure","Decision-making","Composure under public scrutiny","Long-term discipline"],
+    challenges:[
+      {p:"The exam has an extremely low selection rate, and many attempt it multiple times.", f:"Set a personal attempt limit and backup career plan in advance, so preparation doesn't become an open-ended, all-consuming bet."},
+      {p:"Years of preparation with no income can strain finances and morale.", f:"Consider working a job alongside early attempts rather than treating exam prep as the only activity for years."},
+      {p:"Once in service, postings can involve political pressure or difficult transfers.", f:"Build a reputation for integrity early — it becomes your strongest protection over a long career."}
+    ],
+    salary:"Government pay scale, moderate at entry but with steady, guaranteed increases, housing, and other benefits over a career.",
+    day:"Administrative decision-making, public grievance handling, and coordinating government schemes and departments."
+  },
+  {
+    id:"police-officer", name:"Police Officer", cat:"Government", code:"POL",
+    overview:"Maintains public order, investigates crime, and enforces the law — a physically and mentally demanding public service career.",
+    path:[
+      {stage:"School", age:"14–18", title:"Any stream + physical fitness", desc:"No fixed academic stream, but physical fitness standards (running, height) apply from this stage onward."},
+      {stage:"College", age:"18–21", title:"Bachelor's degree (for officer ranks)", desc:"A bachelor's degree is required for officer-level entry exams; constable-level entry needs Class 12."},
+      {stage:"Entrance exam", age:"20–25", title:"Police recruitment / civil services exam", desc:"Written exam, physical test, and interview — varies by entry level (constable, sub-inspector, or IPS via UPSC)."},
+      {stage:"Training", age:"22–26", title:"Police academy training", desc:"Rigorous physical and procedural training at a police academy before active duty."},
+      {stage:"Entry posting", age:"23–27", title:"Sub-Inspector / Assistant Superintendent", desc:"First active posting, handling real cases and field responsibility."},
+      {stage:"Growth", age:"35+", title:"Superintendent / Senior command roles", desc:"Moves into district or state-level leadership over a career."}
+    ],
+    education:"Class 12 minimum for constable-level entry; a bachelor's degree for officer-level entry via competitive exams.",
+    skills:["Physical fitness","Composure under pressure","Decision-making","Investigative thinking","Public communication"],
+    challenges:[
+      {p:"The job carries genuine physical risk and long, irregular hours.", f:"Maintain fitness and stress-management routines as non-negotiable parts of the job, not optional extras."},
+      {p:"Public trust and scrutiny of police conduct can be intense.", f:"Follow procedure carefully and document actions thoroughly — this protects both the public and the officer."},
+      {p:"Exposure to traumatic events is common and can accumulate over a career.", f:"Use available counselling or peer support systems rather than normalising the stress as 'just the job'."}
+    ],
+    salary:"Government pay scale, varies by rank, with steady increases and benefits over a career.",
+    day:"Patrolling, case investigation, paperwork, and coordination with the judicial system."
+  },
+  {
+    id:"army-officer", name:"Armed Forces Officer", cat:"Defence", code:"ARM",
+    overview:"Leads and serves in the military — a career combining physical discipline, leadership, and national service.",
+    path:[
+      {stage:"School", age:"14–18", title:"Physical fitness + any stream", desc:"Physical fitness standards apply early; Science stream is needed for technical entries (engineering, aviation)."},
+      {stage:"Entrance exam", age:"17–21", title:"NDA / CDS or equivalent exam", desc:"A written exam followed by rigorous physical and psychological testing (Service Selection Board)."},
+      {stage:"Academy training", age:"19–22", title:"Military academy training", desc:"1–3 years of intensive physical, tactical, and leadership training before commissioning as an officer."},
+      {stage:"Entry posting", age:"21–24", title:"Lieutenant / equivalent junior rank", desc:"First unit posting, leading a small team and learning operational responsibility directly."},
+      {stage:"Growth", age:"28–40", title:"Captain to Colonel (or equivalent)", desc:"Takes on larger units and more complex operational and strategic responsibility."},
+      {stage:"Mastery", age:"45+", title:"Senior command / General rank", desc:"Leads at brigade level or above, or transitions into strategic and policy roles."}
+    ],
+    education:"Class 12 (Science stream for technical branches) followed by a national defence academy entrance exam and academy training.",
+    skills:["Leadership under pressure","Physical endurance","Discipline","Tactical thinking","Teamwork"],
+    challenges:[
+      {p:"Frequent relocations can be hard on family life.", f:"Build a strong support network and communicate expectations clearly with family from early in the career."},
+      {p:"The role can involve genuine danger during active deployment.", f:"Rely fully on training and protocol — the training exists specifically to manage this risk."},
+      {p:"Transitioning to civilian life after service can be a difficult adjustment.", f:"Start building civilian-relevant skills or connections years before an eventual transition, not right at the end."}
+    ],
+    salary:"Government pay scale with rank-based increases, plus housing, medical, and pension benefits.",
+    day:"Varies hugely by posting — training, operational duty, administration, or strategic planning."
+  },
+  {
+    id:"commercial-pilot", name:"Commercial Pilot", cat:"Aviation", code:"PLT",
+    overview:"Flies passenger or cargo aircraft — a career requiring precision, calm decision-making, and years of expensive, rigorous training.",
+    path:[
+      {stage:"School", age:"14–18", title:"Physics and Maths, strong eyesight", desc:"Science stream with Physics and Maths; certain medical fitness standards (especially vision) apply from early on."},
+      {stage:"Medical clearance", age:"17–18", title:"Aviation medical exam", desc:"A specific medical fitness test is required before starting flight training — worth checking eligibility early."},
+      {stage:"Flight school", age:"18–21", title:"Commercial Pilot Licence (CPL) training", desc:"1.5–2 years of ground school and flight hours at an approved flying academy."},
+      {stage:"Type rating", age:"21–22", title:"Aircraft type rating", desc:"Additional training certifying you to fly a specific aircraft model used by airlines."},
+      {stage:"Entry job", age:"22–25", title:"First Officer (Co-pilot)", desc:"Flies under a Captain's supervision, building flight hours and experience."},
+      {stage:"Mastery", age:"30+", title:"Captain", desc:"Takes command of the aircraft after accumulating sufficient flight hours and experience."}
+    ],
+    education:"Commercial Pilot Licence (CPL) from an approved flying school (roughly 1.5–2 years), plus a specific aircraft type rating.",
+    skills:["Precision under pressure","Quick decision-making","Technical system knowledge","Communication with crew/ATC","Composure in emergencies"],
+    challenges:[
+      {p:"Flight training is very expensive, often a significant upfront cost.", f:"Research loan schemes and airline-sponsored training programs before assuming this path is financially out of reach."},
+      {p:"Getting an airline job after licensing isn't guaranteed and can take time.", f:"Build flight hours through instructing or smaller charter work while applying to airlines."},
+      {p:"The job involves irregular hours, jet lag, and time away from home.", f:"Talk to working pilots about actual rosters before choosing an airline or route type, as this varies a lot."}
+    ],
+    salary:"Entry-level First Officers earn moderately; experienced Captains at major airlines can earn significantly more.",
+    day:"Pre-flight checks, flying scheduled routes, and mandatory rest periods between duties."
+  },
+  {
+    id:"chef", name:"Chef", cat:"Hospitality", code:"CHF",
+    overview:"Plans, prepares, and leads the creation of food in restaurants, hotels, or their own kitchen — equal parts creativity and discipline under pressure.",
+    path:[
+      {stage:"School", age:"14–18", title:"No fixed stream", desc:"Any stream works; a genuine interest in cooking and willingness to work with your hands matters most."},
+      {stage:"Culinary school", age:"18–21", title:"Diploma or degree in culinary arts", desc:"1–3 year hospitality/culinary program covering technique, hygiene, and kitchen management."},
+      {stage:"Apprenticeship", age:"19–23", title:"Commis Chef", desc:"Entry-level kitchen role learning stations and technique under senior chefs, often demanding long hours."},
+      {stage:"Growth", age:"23–28", title:"Chef de Partie / Sous Chef", desc:"Runs a specific kitchen station, then assists in overseeing the entire kitchen."},
+      {stage:"Mastery", age:"30+", title:"Head Chef / Executive Chef", desc:"Leads the kitchen, designs the menu, and manages the full kitchen team and budget."}
+    ],
+    education:"A culinary diploma or degree (1–3 years) is common, though some chefs rise through hands-on kitchen apprenticeship alone.",
+    skills:["Culinary technique","Working under time pressure","Team coordination","Palate & creativity","Hygiene discipline"],
+    challenges:[
+      {p:"Kitchen hours are long, physically demanding, and often include nights and weekends.", f:"Choose your early kitchens carefully — culture varies hugely, and a good mentor kitchen makes the hard hours worthwhile."},
+      {p:"Kitchens can have a harsh, high-pressure culture, especially in fine dining.", f:"It's fine to seek kitchens known for developing people rather than just being famous — reputation among former staff is a good signal."},
+      {p:"Starting pay is often low relative to the physical demands.", f:"View the first few years explicitly as skill-building — pay improves significantly with a strong reputation and rising rank."}
+    ],
+    salary:"Modest at Commis level, rising substantially for experienced Head Chefs, especially in top hotels or their own restaurant.",
+    day:"Prep work, active service during meal hours, and inventory or menu planning between services."
+  },
+  {
+    id:"fashion-designer", name:"Fashion Designer", cat:"Creative", code:"FSD",
+    overview:"Designs clothing and accessories, translating an idea or trend into something people actually want to wear.",
+    path:[
+      {stage:"School", age:"14–18", title:"Build a sketching/making habit", desc:"No fixed stream; a genuine interest in fabric, form, and sketching helps for design school portfolios."},
+      {stage:"Entrance", age:"17–18", title:"Design entrance exam or portfolio admission", desc:"Exams like NIFT (India) test design aptitude, or admission is based on a submitted portfolio."},
+      {stage:"College", age:"18–22", title:"Fashion design degree", desc:"3–4 year program covering pattern-making, textiles, and a final graduate collection."},
+      {stage:"Entry job", age:"21–24", title:"Assistant Designer", desc:"Works under a senior designer or label, executing designs and learning production constraints."},
+      {stage:"Growth", age:"25–30", title:"Senior Designer / Head of Design", desc:"Leads a collection or brand's design direction."},
+      {stage:"Mastery", age:"30+", title:"Creative Director / Own label", desc:"Sets full creative vision for a brand, or launches an independent label."}
+    ],
+    education:"A fashion design degree (3–4 years) is common; a strong portfolio can also open doors independently of formal credentials.",
+    skills:["Sketching & pattern-making","Textile knowledge","Trend awareness","Client/brand communication","Taking feedback well"],
+    challenges:[
+      {p:"The industry is highly competitive with limited entry-level positions at top labels.", f:"Build a distinctive personal design point of view early — a portfolio that looks like everyone else's rarely stands out."},
+      {p:"Turning a creative vision into something manufacturable at scale is a real skill gap for many designers.", f:"Spend time understanding production and costing early, not just design — this makes you far more hireable."},
+      {p:"Independent labels often struggle with cash flow in early years.", f:"Start with a smaller, focused product line rather than a full collection to manage costs while building a customer base."}
+    ],
+    salary:"Modest at assistant level, scaling well for senior designers, creative directors, or successful independent labels.",
+    day:"Sketching and design work, fabric sourcing, fittings, and coordination with production teams."
+  },
+  {
+    id:"actor", name:"Actor", cat:"Entertainment", code:"ACT",
+    overview:"Performs in film, television, or theatre — one of the least linear career paths, driven as much by persistence and networking as by talent.",
+    path:[
+      {stage:"School", age:"14–18", title:"Drama clubs and small performances", desc:"No fixed academic path; school plays or local theatre are the most common early exposure."},
+      {stage:"Training (optional)", age:"18–22", title:"Acting school or theatre degree", desc:"Not mandatory, but formal training builds technique and, often, useful industry connections."},
+      {stage:"Early work", age:"20–26", title:"Small roles, theatre, ads", desc:"Most actors spend years in small roles, background work, or theatre while auditioning consistently."},
+      {stage:"Breakthrough (for some)", age:"25–35", title:"First significant role", desc:"A noticed role that opens doors to bigger, more consistent work — timing varies hugely per person."},
+      {stage:"Growth", age:"30+", title:"Established actor", desc:"Regular work across projects, growing choice over roles taken."}
+    ],
+    education:"No fixed educational requirement; formal acting training (degree or dedicated school) helps build technique and networks but isn't mandatory.",
+    skills:["Emotional range","Memorisation","Resilience to rejection","Networking","Physical presence & voice control"],
+    challenges:[
+      {p:"Most working actors face long stretches without paid roles.", f:"Build a parallel skill (teaching, voiceover, content creation) that provides steady income between acting jobs."},
+      {p:"Rejection is constant, even for skilled and experienced actors.", f:"Treat auditions as practice reps rather than referendums on your worth — most auditions end in 'no' for everyone."},
+      {p:"The industry can involve exploitative practices, especially for newcomers.", f:"Work with a registered agent or union, and never pay large upfront fees to anyone promising guaranteed roles."}
+    ],
+    salary:"Extremely variable — many early-career actors earn little; successful, established actors can earn very well.",
+    day:"Auditions, rehearsals, and — when working — long shooting or performance days."
+  },
+  {
+    id:"musician", name:"Musician", cat:"Creative", code:"MUS",
+    overview:"Composes, performs, or records music — spanning everything from session work to touring artists to composing for film.",
+    path:[
+      {stage:"School", age:"10–18", title:"Learn an instrument or voice early", desc:"Starting formal or informal music training young builds technical foundation that's hard to catch up on later."},
+      {stage:"Training (optional)", age:"18–22", title:"Music degree or continued mentorship", desc:"A formal music degree helps for classical/session work; many contemporary musicians train informally instead."},
+      {stage:"Early work", age:"18–26", title:"Gigs, covers, small releases", desc:"Builds a following and reputation through live performance and independent releases."},
+      {stage:"Growth", age:"22–30", title:"Session work / growing following", desc:"Takes paid session or backing work, or grows an independent audience through consistent releases."},
+      {stage:"Mastery", age:"28+", title:"Established artist / composer", desc:"Sustains a career through touring, licensing, composing, or a strong independent fanbase."}
+    ],
+    education:"No fixed requirement; formal music training helps technical skill, but consistent practice and performance experience matter most.",
+    skills:["Instrumental/vocal technique","Composition","Stage presence","Business basics (royalties, contracts)","Resilience to inconsistent income"],
+    challenges:[
+      {p:"Income is often irregular, especially before building a following.", f:"Diversify income early — teaching, session work, and licensing alongside personal releases smooths out the unpredictability."},
+      {p:"It's easy to be taken advantage of in contracts without music-industry knowledge.", f:"Learn contract and royalty basics early, or use a trusted lawyer before signing anything significant."},
+      {p:"Standing out in an oversaturated market is genuinely difficult.", f:"Consistency of release and a clear artistic identity matter more than one viral moment for a sustainable career."}
+    ],
+    salary:"Extremely variable — many musicians supplement income with teaching or session work; successful touring/recording artists can earn very well.",
+    day:"Practice, songwriting or recording sessions, and — depending on career stage — live performances or teaching."
+  },
+  {
+    id:"athlete", name:"Professional Athlete", cat:"Sports", code:"ATH",
+    overview:"Competes professionally in a sport — a career with a short competitive window that demands starting young and training relentlessly.",
+    path:[
+      {stage:"Early training", age:"6–14", title:"Start sport-specific training young", desc:"Most professional athletes begin structured training in childhood — starting very late is a real disadvantage in most sports."},
+      {stage:"School", age:"14–18", title:"Balance academics with serious training", desc:"Many schools/academies allow a modified academic schedule for serious young athletes."},
+      {stage:"Competitive circuit", age:"16–22", title:"State/national level competition", desc:"Competing at increasingly high levels to get noticed by scouts, clubs, or national selectors."},
+      {stage:"Professional entry", age:"18–24", title:"Signing with a club/team or turning pro", desc:"The transition point into paid, professional competition — timing varies hugely by sport."},
+      {stage:"Peak career", age:"22–32", title:"Competitive prime", desc:"Most athletes' peak performance years, though this varies significantly by sport."},
+      {stage:"Transition", age:"30–38", title:"Retirement & second career", desc:"Moves into coaching, commentary, sports management, or an entirely different field."}
+    ],
+    education:"No fixed academic requirement, though many athletes pursue a degree alongside training as a backup path.",
+    skills:["Physical conditioning","Mental resilience","Discipline","Handling public pressure","Injury management"],
+    challenges:[
+      {p:"Career-ending injury risk is real and can happen at any point.", f:"Build a genuine backup plan (education, a second skill) rather than treating sport as the only possible path."},
+      {p:"The competitive window is short, and only a small fraction reach the professional level.", f:"Set honest checkpoints with a coach about realistic progress, rather than committing everything indefinitely on hope alone."},
+      {p:"Retirement from competitive sport, often in your 30s, can be a difficult identity transition.", f:"Start building interests and skills outside the sport well before retirement becomes necessary."}
+    ],
+    salary:"Extremely variable by sport and level — ranges from minimal at lower levels to very high for top professionals.",
+    day:"Structured training, conditioning, and — during season — competitions or matches."
+  },
+  {
+    id:"veterinarian", name:"Veterinarian", cat:"Healthcare", code:"VET",
+    overview:"Diagnoses and treats animals — from household pets to livestock — combining medical skill with genuine comfort around animals.",
+    path:[
+      {stage:"School", age:"14–18", title:"Biology, Chemistry, Physics", desc:"Science stream is compulsory, similar preparation to human medicine."},
+      {stage:"Entrance", age:"17–18", title:"Veterinary entrance exam", desc:"A national or state-level entrance exam for veterinary college admission."},
+      {stage:"College", age:"18–23", title:"B.V.Sc degree", desc:"5-year degree including clinical rotations across different animal types."},
+      {stage:"Internship", age:"23–24", title:"Compulsory internship", desc:"A supervised clinical internship year before independent registration."},
+      {stage:"Entry job", age:"24–27", title:"Junior Veterinarian", desc:"Works in a clinic, farm, or animal hospital under a senior vet."},
+      {stage:"Mastery", age:"30+", title:"Specialist / Practice owner", desc:"Specialises in a field (surgery, large animals) or runs an independent practice."}
+    ],
+    education:"B.V.Sc (5 years) plus a compulsory internship year before independent registration.",
+    skills:["Animal handling","Diagnostic reasoning","Composure in emergencies","Communication with owners","Physical stamina"],
+    challenges:[
+      {p:"Delivering difficult news to distressed pet owners is a constant emotional demand.", f:"Develop clear, compassionate communication scripts for hard conversations — this genuinely gets easier with practice."},
+      {p:"Physical risk from handling frightened or large animals is real.", f:"Never skip proper restraint or sedation protocol, even under time pressure from a worried owner."},
+      {p:"Rural or farm-animal practice can mean unpredictable hours and travel.", f:"Clarify practice type (small animal clinic vs. farm/large animal) early, since the lifestyle differs hugely."}
+    ],
+    salary:"₹3–5 LPA entry level, rising with specialisation or successful independent practice.",
+    day:"Consultations, diagnostics, minor procedures or surgery, and owner communication."
+  },
+  {
+    id:"physiotherapist", name:"Physiotherapist", cat:"Healthcare", code:"PT",
+    overview:"Helps patients recover movement and manage pain after injury, surgery, or chronic conditions through physical treatment and exercise.",
+    path:[
+      {stage:"School", age:"14–18", title:"Biology-focused science stream", desc:"Biology is essential; Physics helps with understanding movement mechanics."},
+      {stage:"Entrance", age:"17–18", title:"Physiotherapy entrance or direct admission", desc:"Some colleges require an entrance exam; others admit directly on Class 12 science marks."},
+      {stage:"College", age:"18–22", title:"Bachelor's in Physiotherapy (BPT)", desc:"4–4.5 year degree with clinical rotations across different patient types."},
+      {stage:"Internship", age:"22–23", title:"Compulsory clinical internship", desc:"Supervised practical training before independent registration."},
+      {stage:"Entry job", age:"23–26", title:"Junior Physiotherapist", desc:"Works in a hospital, clinic, or sports team setting under senior supervision."},
+      {stage:"Growth", age:"28+", title:"Senior Physio / Specialist / Own clinic", desc:"Specialises (sports, neuro, paediatric) or opens an independent practice."}
+    ],
+    education:"Bachelor's in Physiotherapy (BPT, 4–4.5 years) followed by a clinical internship and registration.",
+    skills:["Anatomy knowledge","Hands-on treatment technique","Patience","Communication & motivation","Problem-solving for individual cases"],
+    challenges:[
+      {p:"Progress with patients can be slow, which can be discouraging for both patient and therapist.", f:"Set small, visible milestones with patients rather than focusing only on the full recovery, which keeps motivation up for both sides."},
+      {p:"The work is physically demanding on the therapist's own body over time.", f:"Learn and consistently use proper body mechanics yourself — physios are not exempt from the injuries they treat in others."},
+      {p:"Building an independent client base takes time if going into private practice.", f:"Gain experience and a professional network within a hospital or clinic setting before going independent."}
+    ],
+    salary:"₹2.5–4.5 LPA entry level, higher for sports-team roles, specialists, or established private practices.",
+    day:"Patient assessments, hands-on treatment sessions, and progress documentation."
+  },
+  {
+    id:"dentist", name:"Dentist", cat:"Medicine", code:"DEN",
+    overview:"Diagnoses and treats issues with teeth, gums, and the mouth — a medical path that's shorter than an MBBS but still rigorous.",
+    path:[
+      {stage:"School", age:"14–18", title:"Biology, Chemistry, Physics", desc:"Science stream is compulsory, same core subjects as medicine."},
+      {stage:"Entrance", age:"17–18", title:"Dental entrance exam", desc:"Exams like NEET (India) determine admission to dental college, similar to the medical entrance process."},
+      {stage:"College", age:"18–23", title:"BDS degree", desc:"5-year degree including a compulsory 1-year rotating internship."},
+      {stage:"Specialisation (optional)", age:"23–26", title:"MDS postgraduate degree", desc:"A 3-year specialisation (orthodontics, oral surgery, etc.) for higher-paying and specialised roles."},
+      {stage:"Entry practice", age:"23–26", title:"Junior Dentist / Associate", desc:"Works in a clinic or hospital, building hands-on procedural experience."},
+      {stage:"Mastery", age:"28+", title:"Specialist / Own practice", desc:"Runs an independent practice or works as a specialist in a hospital setting."}
+    ],
+    education:"BDS (5 years including internship); MDS (3 more years) for specialisation, though not mandatory to practise generally.",
+    skills:["Fine motor precision","Diagnostic reasoning","Patient communication","Composure with anxious patients","Business basics (for private practice)"],
+    challenges:[
+      {p:"Many patients feel anxious or fearful about dental visits.", f:"Build a calm, explain-as-you-go communication style — this alone significantly improves patient cooperation and outcomes."},
+      {p:"Setting up an independent practice requires significant upfront investment.", f:"Gain a few years of associate experience first to build savings, skill, and a patient base before going independent."},
+      {p:"Repetitive strain injuries are common given the fine, sustained hand movements involved.", f:"Invest in proper ergonomic setup and posture habits from the very start of your career."}
+    ],
+    salary:"₹3–5 LPA entry level as an associate, scaling well with specialisation or a successful private practice.",
+    day:"Patient consultations, procedures (fillings, extractions, etc.), and treatment planning."
+  },
+  {
+    id:"investment-banker", name:"Investment Banker", cat:"Finance", code:"IB",
+    overview:"Advises companies on raising capital, mergers, and acquisitions — a high-pressure, high-reward corner of finance.",
+    path:[
+      {stage:"School", age:"14–18", title:"Maths and Economics focus", desc:"Commerce or Science stream with strong Maths; Economics helps build early context."},
+      {stage:"College", age:"18–22", title:"Bachelor's in Finance, Economics, or Commerce", desc:"A strong bachelor's degree, often from a well-regarded institution, is important for initial recruitment."},
+      {stage:"Entry job", age:"22–25", title:"Analyst", desc:"Works extremely long hours building financial models and pitch materials under senior bankers."},
+      {stage:"Growth", age:"25–28", title:"Associate", desc:"Often after an MBA, takes on more client-facing and deal-execution responsibility."},
+      {stage:"Senior growth", age:"29–35", title:"Vice President / Director", desc:"Leads deal teams and begins managing client relationships directly."},
+      {stage:"Mastery", age:"38+", title:"Managing Director", desc:"Brings in major clients and deals, effectively running a book of business."}
+    ],
+    education:"Bachelor's in Finance/Economics/Commerce; an MBA from a top institution is often needed to progress beyond Analyst level.",
+    skills:["Financial modelling","Composure under extreme pressure","Attention to detail","Client communication","Long-hours stamina"],
+    challenges:[
+      {p:"Working hours are notoriously long, especially at the Analyst level.", f:"Go in with clear eyes about the trade-off — this path pays well specifically because of this demand; decide if it fits your priorities before committing."},
+      {p:"Burnout is common within the first few years.", f:"Protect basic health habits (sleep, exercise) even in small amounts — consistency beats intensity for sustaining multi-year careers."},
+      {p:"Competition for entry-level roles at top banks is extremely high.", f:"Build a strong technical foundation (financial modelling, valuation) and network actively well before recruitment season."}
+    ],
+    salary:"₹8–15 LPA for Analysts at top firms in India, scaling dramatically at senior levels (bonuses included).",
+    day:"Financial modelling, pitch deck preparation, and client or deal-team meetings — often extending into the night."
+  },
+  {
+    id:"marketing-manager", name:"Marketing Manager", cat:"Business", code:"MKT",
+    overview:"Plans and runs campaigns that get a product or service in front of the right people — a mix of creativity, data, and persuasion.",
+    path:[
+      {stage:"School", age:"14–18", title:"Any stream", desc:"No fixed subject requirement; strong communication skills matter more than a specific stream."},
+      {stage:"College", age:"18–22", title:"Bachelor's in Business, Marketing, or any field", desc:"Marketing-specific degrees help but aren't mandatory — many marketers come from varied academic backgrounds."},
+      {stage:"Entry job", age:"22–25", title:"Marketing Executive/Associate", desc:"Executes campaigns, manages social channels, and analyses basic performance data under a manager."},
+      {stage:"Growth", age:"25–30", title:"Marketing Manager", desc:"Owns campaign strategy and budget for a product or region."},
+      {stage:"Senior growth", age:"30–36", title:"Senior/Head of Marketing", desc:"Sets overall marketing strategy across products or the whole company."},
+      {stage:"Mastery", age:"38+", title:"Chief Marketing Officer", desc:"Sits on the leadership team, shaping brand and growth strategy at the highest level."}
+    ],
+    education:"A bachelor's degree in any field works; a marketing-specific degree or an MBA can accelerate progress but isn't mandatory.",
+    skills:["Data analysis","Creative thinking","Communication","Budget management","Adaptability to trends"],
+    challenges:[
+      {p:"Marketing effectiveness is often hard to prove definitively, which can create internal pressure.", f:"Build the habit of tracking clear metrics from campaign day one, so results are demonstrable rather than argued after the fact."},
+      {p:"Channels and best practices change constantly (social platforms, algorithms).", f:"Focus on transferable skills — audience understanding, clear messaging — rather than over-specialising in one platform's quirks."},
+      {p:"Creative ideas often get diluted through layers of internal approval.", f:"Learn to present ideas with the business rationale attached, not just the creative concept — this significantly improves approval rates."}
+    ],
+    salary:"₹4–7 LPA entry level, rising to ₹20+ LPA for senior marketing leadership roles.",
+    day:"Campaign planning, performance review, and cross-team coordination with design and sales."
+  },
+  {
+    id:"ux-designer", name:"UX/UI Designer", cat:"Technology", code:"UX",
+    overview:"Designs how digital products look and feel to use — making sure an app or website is both clear and pleasant to interact with.",
+    path:[
+      {stage:"School", age:"14–18", title:"Build an eye for design + basic tech comfort", desc:"No fixed stream; curiosity about how apps and websites are put together helps."},
+      {stage:"College/Training", age:"18–22", title:"Design degree or self-taught + bootcamp", desc:"A design degree helps, but many UX designers build skill through bootcamps, self-study, and personal projects instead."},
+      {stage:"Portfolio building", age:"20–23", title:"Build case studies", desc:"A portfolio of 3–5 solid case studies (redesigns, personal projects) is usually essential to get hired."},
+      {stage:"Entry job", age:"22–25", title:"Junior UX/UI Designer", desc:"Works on smaller features or flows under a senior designer, learning research and iteration processes."},
+      {stage:"Growth", age:"26–32", title:"Senior Product Designer", desc:"Owns entire product areas, works closely with engineering and product management."},
+      {stage:"Mastery", age:"32+", title:"Design Lead / Head of Design", desc:"Sets design direction and process across a whole product or company."}
+    ],
+    education:"No fixed requirement — a design degree, bootcamp, or strong self-taught portfolio can all lead in, with the portfolio mattering most.",
+    skills:["User research","Visual & interaction design","Software (Figma)","Communicating design decisions","Collaboration with engineers"],
+    challenges:[
+      {p:"It's hard to break in without experience, but hard to gain experience without a first role.", f:"Redesign an existing app or product as a personal case study — this is a widely accepted way to demonstrate skill without prior job experience."},
+      {p:"Design decisions often get overridden by business or engineering constraints.", f:"Learn to frame design choices in terms of user and business impact — this earns more influence over final decisions."},
+      {p:"It's easy to design something visually appealing that doesn't actually solve the user's problem.", f:"Validate designs with real user testing before committing significant engineering time to build them."}
+    ],
+    salary:"₹4–8 LPA entry level, rising to ₹20–35+ LPA for senior product designers or design leads.",
+    day:"User research, wireframing/prototyping, and collaboration meetings with product and engineering."
+  },
+  {
+    id:"product-manager", name:"Product Manager", cat:"Technology", code:"PM",
+    overview:"Decides what a product should do next, balancing user needs, business goals, and what engineering can realistically build.",
+    path:[
+      {stage:"School", age:"14–18", title:"Any stream", desc:"No fixed subject requirement; a mix of curiosity about technology and people helps."},
+      {stage:"College", age:"18–22", title:"Any bachelor's degree", desc:"Engineering, business, or design backgrounds are all common paths into product management."},
+      {stage:"Early career", age:"22–26", title:"Related role first (engineering, design, business analyst)", desc:"Most product managers move in from an adjacent role rather than starting directly as a PM."},
+      {stage:"Entry PM role", age:"25–28", title:"Associate/Junior Product Manager", desc:"Owns a small feature or product area, working closely with an engineering team."},
+      {stage:"Growth", age:"28–34", title:"Senior Product Manager", desc:"Owns a larger product area or a full product line, sets roadmap priorities."},
+      {stage:"Mastery", age:"35+", title:"Director / VP of Product", desc:"Sets product strategy across multiple teams or the entire company."}
+    ],
+    education:"No fixed requirement — often a second career move after engineering, design, or business roles; an MBA can help but isn't mandatory.",
+    skills:["Prioritisation","Communication across teams","Data-informed decision-making","User empathy","Basic technical fluency"],
+    challenges:[
+      {p:"It's a role with a lot of responsibility but often no direct authority over the team.", f:"Lead through clear reasoning and relationship-building rather than authority — influence is the actual currency of this role."},
+      {p:"Stakeholders often disagree on priorities, and someone will always be unhappy with a decision.", f:"Make prioritisation criteria explicit and consistent, so decisions feel principled rather than arbitrary."},
+      {p:"Breaking into product management without a first PM role is genuinely difficult.", f:"Look for adjacent roles (business analyst, associate PM programs) as a more realistic entry point than jumping straight in."}
+    ],
+    salary:"₹8–15 LPA entry level in India tech companies, rising to ₹30–50+ LPA for senior leadership roles.",
+    day:"Roadmap planning, stakeholder meetings, and reviewing product data and user feedback."
+  },
+  {
+    id:"cybersecurity-analyst", name:"Cybersecurity Analyst", cat:"Technology", code:"SEC",
+    overview:"Protects computer systems and networks from attacks — finding and fixing weaknesses before someone else exploits them.",
+    path:[
+      {stage:"School", age:"14–18", title:"Maths and computer basics", desc:"Computer Science if available; strong logical reasoning helps regardless of stream."},
+      {stage:"College", age:"18–22", title:"Computer Science or IT degree", desc:"4-year degree covering networking, systems, and basic security concepts."},
+      {stage:"Certification", age:"21–23", title:"Security certifications (e.g. CompTIA Security+, CEH)", desc:"Industry certifications are often expected alongside or instead of a degree for entry-level roles."},
+      {stage:"Entry job", age:"22–25", title:"SOC Analyst / Junior Security Analyst", desc:"Monitors systems for threats and responds to security alerts under senior guidance."},
+      {stage:"Growth", age:"26–32", title:"Security Engineer / Penetration Tester", desc:"Proactively tests systems for vulnerabilities or builds security infrastructure."},
+      {stage:"Mastery", age:"32+", title:"Security Architect / CISO", desc:"Designs overall security strategy for an organisation."}
+    ],
+    education:"Computer Science/IT degree helps, but industry certifications (Security+, CEH, OSCP) often matter as much or more for hiring.",
+    skills:["Networking fundamentals","Threat analysis","Attention to detail","Continuous learning","Ethical judgment"],
+    challenges:[
+      {p:"Threats and attack techniques evolve constantly, requiring ongoing learning.", f:"Treat continuous learning (new certifications, reading threat reports) as a permanent part of the job, not a one-time requirement."},
+      {p:"The work can involve high-pressure incident response when a breach actually happens.", f:"Practice incident response drills regularly so the real event feels like a rehearsed process, not a panic."},
+      {p:"It's a field where ethical boundaries matter a lot — the same skills can be used maliciously.", f:"Only ever test systems you have explicit authorisation for — this single rule protects your entire career."}
+    ],
+    salary:"₹5–9 LPA entry level, rising to ₹20–35+ LPA for senior security engineers or architects.",
+    day:"Monitoring security alerts, investigating incidents, and testing or patching vulnerabilities."
+  },
+  {
+    id:"animator", name:"Animator / VFX Artist", cat:"Creative", code:"VFX",
+    overview:"Creates moving images and visual effects for films, games, and advertising — bringing static art to life frame by frame.",
+    path:[
+      {stage:"School", age:"14–18", title:"Build a drawing/digital art habit", desc:"No fixed stream; a genuine habit of drawing or digital art practice matters most for later portfolio work."},
+      {stage:"Training", age:"18–21", title:"Animation/VFX diploma or degree", desc:"1–3 year specialised program covering animation principles and industry software."},
+      {stage:"Portfolio building", age:"20–22", title:"Build a demo reel", desc:"A strong demo reel of short animated clips or VFX shots is essential for hiring, often more than the credential itself."},
+      {stage:"Entry job", age:"21–24", title:"Junior Animator/VFX Artist", desc:"Works on specific shots or sequences under a lead artist, following a studio's pipeline."},
+      {stage:"Growth", age:"25–30", title:"Senior Artist / Lead", desc:"Owns more complex sequences and mentors junior artists."},
+      {stage:"Mastery", age:"32+", title:"Animation Director / Studio lead", desc:"Sets creative and technical direction for a project or studio."}
+    ],
+    education:"A specialised animation/VFX diploma or degree (1–3 years); a strong demo reel matters as much as the credential.",
+    skills:["Drawing/digital art fundamentals","Software (Maya, After Effects, Blender)","Attention to timing & detail","Taking direction well","Patience for iterative work"],
+    challenges:[
+      {p:"Project deadlines (especially near release dates) can mean very long crunch hours.", f:"Research a studio's crunch culture and project history before joining — this varies significantly between studios."},
+      {p:"Entry-level roles are highly competitive relative to the number of positions available.", f:"A focused, polished reel of a few strong clips beats a large reel of mediocre ones for getting noticed."},
+      {p:"Freelance VFX work can have unpredictable, delayed payment cycles.", f:"Use contracts with clear milestones and partial upfront payment when working independently."}
+    ],
+    salary:"₹3–6 LPA entry level, rising well for senior artists or leads at major studios.",
+    day:"Focused work on specific shots or sequences, reviews with a lead artist, and iteration based on feedback."
+  },
+  {
+    id:"hotel-manager", name:"Hotel Manager", cat:"Hospitality", code:"HTL",
+    overview:"Oversees the daily operations of a hotel — from guest experience to staff management to the property's overall profitability.",
+    path:[
+      {stage:"School", age:"14–18", title:"Any stream", desc:"No fixed subject requirement; strong people skills and organisation matter most."},
+      {stage:"College", age:"18–21", title:"Hotel management degree/diploma", desc:"3–4 year program covering front office, housekeeping, food & beverage, and hospitality operations."},
+      {stage:"Entry job", age:"21–24", title:"Management Trainee / Department Supervisor", desc:"Rotates through hotel departments to learn full operations before specialising."},
+      {stage:"Growth", age:"25–30", title:"Department Head (Front Office/F&B)", desc:"Leads a specific department's operations and staff."},
+      {stage:"Mastery", age:"32+", title:"General Manager", desc:"Oversees the entire property's operations, staff, and financial performance."}
+    ],
+    education:"A hotel management degree or diploma (3–4 years) is the standard path, though internal promotion from operational roles also happens.",
+    skills:["People management","Customer service","Organisation under pressure","Financial basics","Problem-solving on the fly"],
+    challenges:[
+      {p:"The role often involves long, irregular hours including weekends and holidays.", f:"Go in with realistic expectations about work-life balance in guest-facing hospitality roles, especially early in your career."},
+      {p:"Handling difficult guest complaints professionally is a constant demand.", f:"Develop a calm, solution-first script for complaints — most escalate only when the guest feels unheard."},
+      {p:"Staff turnover in hospitality can be high, creating constant training demands.", f:"Invest early in team culture and recognition — it directly reduces turnover and the resulting operational strain."}
+    ],
+    salary:"₹3–5 LPA entry level as a trainee, rising to ₹15–25+ LPA for experienced General Managers at larger properties.",
+    day:"Staff coordination, guest interactions, and operational or financial review meetings."
+  }
+];
+
+const CATEGORIES = ["All", ...new Set(CAREERS.map(c=>c.cat))];
+
+const SKILL_DESCRIPTIONS = {
+  "Problem-solving": "Breaking a messy situation into pieces you can actually fix.",
+  "Programming (Python/JS/Java)": "Writing instructions a computer can reliably follow.",
+  "Data structures & algorithms": "Organising and processing information efficiently.",
+  "Communication": "Getting an idea across clearly to someone who doesn't share your context.",
+  "Debugging patience": "Staying calm while hunting down why something isn't working.",
+  "Scientific reasoning": "Drawing conclusions from evidence rather than assumption.",
+  "Composure under pressure": "Thinking clearly when the stakes and stress are both high.",
+  "Communication with patients": "Explaining serious things in a way that's clear and kind.",
+  "Long-term stamina": "Sustaining effort across years, not just a good week.",
+  "Attention to detail": "Catching the small error before it becomes a big problem.",
+  "Numerical accuracy": "Getting the figures right, every single time.",
+  "Ethics & judgment": "Doing the right thing even when no one is checking.",
+  "Client communication": "Understanding what a client actually needs, not just what they say.",
+  "Discipline for long self-study": "Studying consistently without someone forcing you to.",
+  "Visual composition": "Arranging elements so the eye knows where to look first.",
+  "Typography": "Choosing and setting text so it's easy and pleasant to read.",
+  "Software (Figma, Adobe suite)": "Using the tools of the trade fluently, not just knowing they exist.",
+  "Taking feedback well": "Improving work without taking criticism personally.",
+  "Structural reasoning": "Understanding how forces move through a physical structure.",
+  "Project management": "Keeping people, time, and budget moving toward one goal.",
+  "Software (AutoCAD, STAAD)": "Using specialised design software to plan real structures.",
+  "Site coordination": "Making sure the right people do the right thing on-site, on time.",
+  "Safety judgment": "Never trading a shortcut for someone's safety.",
+  "Statistics": "Reading what data actually says, not what you want it to say.",
+  "Python/R programming": "Writing code to clean, model, and explore data.",
+  "Communicating findings clearly": "Turning a complex analysis into a decision someone can act on.",
+  "Domain curiosity": "Actually caring about the industry behind the numbers.",
+  "Data cleaning patience": "Fixing messy, inconsistent data before any analysis can start.",
+  "Argumentation": "Building a case that holds up when someone pushes back.",
+  "Research & writing": "Finding the relevant precedent and writing it persuasively.",
+  "Reading dense material carefully": "Not missing the one clause that changes everything.",
+  "Negotiation": "Finding an outcome both sides can actually accept.",
+  "Composure under scrutiny": "Holding your position calmly when you're being challenged.",
+  "Active listening": "Hearing what's really being said, including what's left unsaid.",
+  "Empathy with boundaries": "Caring deeply without absorbing someone else's crisis as your own.",
+  "Pattern recognition in behaviour": "Noticing recurring patterns in how someone thinks or acts.",
+  "Confidentiality & ethics": "Protecting what someone has trusted you with.",
+  "Emotional resilience": "Recovering steadily after emotionally heavy days.",
+  "Clear writing": "Saying something complicated in plain, direct language.",
+  "Fact-checking rigor": "Verifying before publishing, every time, no exceptions.",
+  "Interviewing": "Asking the question that gets a real answer, not a rehearsed one.",
+  "Handling deadline pressure": "Producing good work even when the clock is the enemy.",
+  "Ethical judgment": "Choosing honesty over a more convenient story.",
+  "Resilience to failure": "Getting back up quickly after something doesn't work.",
+  "Sales & persuasion": "Helping someone see why what you're offering solves their problem.",
+  "Resourcefulness": "Making real progress with fewer resources than you'd like.",
+  "Hiring & delegation": "Trusting the right people with the right piece of the work.",
+  "Financial basics": "Understanding enough numbers to not run out of money by surprise."
+};
+function skillDesc(skill){ return SKILL_DESCRIPTIONS[skill] || "A skill this career relies on regularly."; }
+
+
+/* ---------------- STATE ---------------- */
+let profile = { name:"", stage:"school", age:"", classYear:"Class 12", course:"", role:"" };
+let activeCategory = "All";
+let chatHistory = []; // {role, content}
+
+/* ---------------- ONBOARDING ---------------- */
+function setStage(stage){
+  profile.stage = stage;
+  document.getElementById('btnSchool').classList.toggle('active', stage==='school');
+  document.getElementById('btnCollege').classList.toggle('active', stage==='college');
+  document.getElementById('btnWorking').classList.toggle('active', stage==='working');
+  document.getElementById('fieldAge').style.display = 'block';
+  document.getElementById('fieldSchool').style.display = stage==='school' ? 'block' : 'none';
+  document.getElementById('fieldCollege').style.display = stage==='college' ? 'block' : 'none';
+  document.getElementById('fieldWorkRole').style.display = stage==='working' ? 'block' : 'none';
+}
+
+function openOnboarding(){
+  document.getElementById('onboardOverlay').classList.remove('hidden');
+}
+
+function finishOnboarding(skip){
+  if(!skip){
+    profile.name = document.getElementById('inpName').value.trim();
+    profile.age = document.getElementById('inpAge').value.trim();
+    profile.classYear = document.getElementById('inpClass').value;
+    profile.course = document.getElementById('inpCourse').value.trim();
+    profile.role = document.getElementById('inpWorkRole').value.trim();
+  }
+  document.getElementById('onboardOverlay').classList.add('hidden');
+  updateProfileChip();
+  seedChat();
+}
+
+function updateProfileChip(){
+  const chip = document.getElementById('profileChip');
+  const text = document.getElementById('profileText');
+  if(profile.name || profile.age){
+    let stageLabel = profile.stage==='school' ? profile.classYear : profile.stage==='college' ? (profile.course||'College') : (profile.role||'Working');
+    text.textContent = (profile.name ? profile.name+' · ' : '') + stageLabel + (profile.age ? ' · Age '+profile.age : '');
+    chip.classList.add('show');
+  }
+}
+
+/* ---------------- CARDS / SEARCH ---------------- */
+function renderChips(){
+  const wrap = document.getElementById('categoryChips');
+  wrap.innerHTML = CATEGORIES.map(c =>
+    `<button class="chip ${c===activeCategory?'active':''}" onclick="setCategory('${c}')">${c}</button>`
+  ).join('');
+}
+function setCategory(cat){ activeCategory = cat; renderChips(); renderCards(); }
+
+function renderCards(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = CAREERS.filter(c => activeCategory==='All' || c.cat===activeCategory);
+  if(q) list = list.filter(c => c.name.toLowerCase().includes(q) || c.cat.toLowerCase().includes(q) || c.overview.toLowerCase().includes(q));
+
+  document.getElementById('resultsLabel').textContent = q ? `Results for "${q}"` : (activeCategory==='All' ? 'All careers' : activeCategory);
+
+  const grid = document.getElementById('cardGrid');
+  if(list.length===0){
+    grid.innerHTML = `<div class="no-results">No careers match that search yet. Try the advisor chat below — ask about any career and I'll help.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(c => `
+    <button class="career-card" onclick="openDetail('${c.id}')">
+      <div class="stamp-badge">${c.code}</div>
+      <div class="cat">${c.cat}</div>
+      <h3>${c.name}</h3>
+      <p>${c.overview.slice(0,90)}...</p>
+    </button>
+  `).join('');
+}
+
+/* ---------------- DETAIL ---------------- */
+function openDetail(id){
+  const c = CAREERS.find(x=>x.id===id);
+  if(!c) return;
+
+  const currentAge = parseInt(profile.age) || null;
+
+  const pathHtml = c.path.map((step,i) => {
+    let isCurrent = false;
+    if(currentAge){
+      const ageMatch = step.age.match(/(\d+)[–-](\d+)/);
+      if(ageMatch && currentAge>=parseInt(ageMatch[1]) && currentAge<=parseInt(ageMatch[2])) isCurrent = true;
+    } else if(profile.stage==='school' && i===0){ isCurrent = true; }
+    return `
+      <div class="path-step ${isCurrent?'current':''}" data-n="${i+1}">
+        <div class="path-step-title">${step.title} ${isCurrent?'<span class="current-tag">You are here</span>':''}</div>
+        <div class="path-step-age">${step.stage} · Age ${step.age}</div>
+        <div class="path-step-desc">${step.desc}</div>
+      </div>`;
+  }).join('');
+
+  const problemsHtml = c.challenges.map(ch => `
+    <div class="problem-card">
+      <div class="p-title">${ch.p}</div>
+      <div class="p-fix"><strong>How to handle it:</strong> ${ch.f}</div>
+    </div>
+  `).join('');
+
+  const skillsHtml = c.skills.map(s => `<span class="skill-pill">${s}</span>`).join('');
+
+  document.getElementById('detailCard').innerHTML = `
+    <div class="detail-head">
+      <button class="detail-close" onclick="closeDetail()" aria-label="Close">✕</button>
+      <div class="detail-cat">${c.cat} · ${c.code}</div>
+      <h2>${c.name}</h2>
+      <p>${c.overview}</p>
+    </div>
+    <div class="detail-body">
+      <div class="detail-section">
+        <h4>The path, start to finish</h4>
+        <div class="path-timeline">${pathHtml}</div>
+      </div>
+      <div class="detail-section">
+        <h4>Quick facts</h4>
+        <div class="stat-row">
+          <div class="stat-box"><div class="num">${c.education.split('(')[1] ? c.education.split('(')[1].replace(')','') : ''}</div><div class="lbl">${c.education}</div></div>
+          <div class="stat-box"><div class="num">₹</div><div class="lbl">${c.salary}</div></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h4>Skills that matter</h4>
+        <div class="skills-list">${skillsHtml}</div>
+      </div>
+      <div class="detail-section">
+        <h4>Real problems people hit — and what helps</h4>
+        ${problemsHtml}
+      </div>
+      <div class="detail-section">
+        <h4>A day in this career</h4>
+        <p style="color:var(--ink-dim); font-size:14px;">${c.day}</p>
+      </div>
+      <div class="detail-section">
+        <h4>Career games</h4>
+        <div class="game-menu">
+          <button class="game-menu-btn" onclick="openGame('${c.id}','quiz')">
+            <span class="gm-icon">🎯</span><span class="gm-label">Field Trial</span>
+          </button>
+          <button class="game-menu-btn" onclick="openGame('${c.id}','sort')">
+            <span class="gm-icon">🔀</span><span class="gm-label">Sort the Path</span>
+          </button>
+          <button class="game-menu-btn" onclick="openGame('${c.id}','match')">
+            <span class="gm-icon">🧩</span><span class="gm-label">Skill Match</span>
+          </button>
+        </div>
+      </div>
+      <button class="ask-chat-btn" onclick="askAboutCareer('${c.name}')">Ask the advisor about ${c.name}</button>
+    </div>
+  `;
+  document.getElementById('detailOverlay').classList.remove('hidden');
+}
+function closeDetail(){ document.getElementById('detailOverlay').classList.add('hidden'); }
+
+/* ---------------- CHATBOT ---------------- */
+function toggleChat(){
+  document.getElementById('chatPanel').classList.toggle('hidden');
+}
+
+function seedChat(){
+  const messages = document.getElementById('chatMessages');
+  if(messages.children.length>0) return;
+  let greeting = "Hi! I'm your career advisor. Ask me about any career, how to prepare for it, or a problem you're stuck on.";
+  if(profile.name){
+    greeting = `Hi ${profile.name}! I can see you're in ${profile.stage==='school'?profile.classYear:profile.stage==='college'?(profile.course||'college'):(profile.role||'work')}. Ask me about any career path, exam, or problem you're facing — I'll tailor advice to where you are.`;
+  }
+  addMessage('bot', greeting);
+}
+
+function addMessage(role, text){
+  const messages = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.textContent = text;
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+function askAboutCareer(name){
+  document.getElementById('chatPanel').classList.remove('hidden');
+  document.getElementById('chatInput').value = `Tell me more about becoming a ${name} given where I am right now.`;
+  closeDetail();
+  sendChat();
+}
+
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  document.getElementById('chatSendBtn').disabled = true;
+
+  addMessage('user', text);
+  chatHistory.push({role:'user', content:text});
+
+  const typing = addMessage('typing', 'Thinking...');
+
+  const profileLine = profile.name || profile.age ?
+    `The student's name is ${profile.name||'unknown'}, age ${profile.age||'unknown'}, currently in ${profile.stage==='school'?profile.classYear:profile.stage==='college'?('college: '+(profile.course||'unspecified course')):('working: '+(profile.role||'unspecified role'))}.` :
+    `No profile details were given yet — keep advice general but still practical.`;
+
+  const systemPrompt = `You are a warm, practical career advisor speaking directly to a student or young person. ${profileLine}
+Give clear, specific, age-appropriate advice. When relevant, reference concrete steps (exams, subjects, timelines) rather than vague encouragement. If they describe a problem or worry, acknowledge it briefly and then give a concrete way to approach it. Keep responses focused — 3 to 6 sentences unless they ask for a detailed breakdown. Avoid sounding like a generic chatbot disclaimer; be direct and genuinely helpful. Do not diagnose mental health conditions; if distress seems serious, gently suggest talking to a trusted adult or counsellor.`;
+
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: chatHistory
+      })
+    });
+    const data = await response.json();
+    typing.remove();
+
+    if(data && data.content){
+      const textBlock = data.content.map(b => b.text || '').filter(Boolean).join('\n');
+      addMessage('bot', textBlock || "I couldn't quite form a response there — could you rephrase your question?");
+      chatHistory.push({role:'assistant', content: textBlock});
+    } else {
+      addMessage('bot', "Something went wrong reaching the advisor. Please try asking again in a moment.");
+    }
+  } catch(err){
+    typing.remove();
+    addMessage('bot', "I couldn't connect just now. Please check your connection and try again.");
+  }
+
+  document.getElementById('chatSendBtn').disabled = false;
+}
+
+/* ---------------- FIELD TRIAL GAME ---------------- */
+let gameState = { careerId:null, questions:[], current:0, score:0, answered:false };
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+function pickRandom(arr, n, exclude=[]){
+  const pool = arr.filter(x => !exclude.includes(x));
+  return shuffle(pool).slice(0,n);
+}
+
+function generateQuiz(career){
+  const others = CAREERS.filter(c => c.id !== career.id);
+  const qs = [];
+
+  // Q1: path order - what comes right after a given stage
+  const stepIdx = Math.floor(Math.random()*(career.path.length-1));
+  const current = career.path[stepIdx];
+  const correctNext = career.path[stepIdx+1].title;
+  const decoyStages = shuffle(career.path.filter((s,i)=>i!==stepIdx+1).map(s=>s.title)).slice(0,2);
+  const extraDecoy = pickRandom(others, 1)[0];
+  const decoyOutside = extraDecoy ? extraDecoy.path[Math.floor(Math.random()*extraDecoy.path.length)].title : "Take a gap year";
+  qs.push({
+    q: `In the ${career.name} path, what typically comes right after "${current.title}"?`,
+    options: shuffle([correctNext, ...decoyStages.slice(0,1), decoyOutside]),
+    correct: correctNext,
+    explain: `After "${current.title}", the next stage is "${correctNext}" — ${career.path[stepIdx+1].desc}`
+  });
+
+  // Q2: which is NOT a real skill for this career
+  const realSkills = shuffle(career.skills).slice(0,3);
+  const decoySkillCareer = pickRandom(others,1)[0];
+  const decoySkill = decoySkillCareer ? shuffle(decoySkillCareer.skills.filter(s=>!career.skills.includes(s)))[0] : "Improvisational cooking";
+  qs.push({
+    q: `Which of these is NOT typically a core skill for a ${career.name}?`,
+    options: shuffle([...realSkills, decoySkill]),
+    correct: decoySkill,
+    explain: `${realSkills.join(", ")} are all real skills used in this career. "${decoySkill}" isn't typically part of it.`
+  });
+
+  // Q3: problem-solving scenario
+  const challenge = career.challenges[Math.floor(Math.random()*career.challenges.length)];
+  const otherChallenge = pickRandom(others,1)[0];
+  const decoyFix1 = career.challenges.find(c=>c!==challenge)?.f || "Ignore it and hope it resolves itself.";
+  const decoyFix2 = otherChallenge ? otherChallenge.challenges[0].f : "Switch careers immediately.";
+  qs.push({
+    q: `Scenario: "${challenge.p}" What's the smartest response?`,
+    options: shuffle([challenge.f, decoyFix1, decoyFix2]),
+    correct: challenge.f,
+    explain: `Best approach: ${challenge.f}`
+  });
+
+  // Q4: education requirement
+  const decoyEduCareer = pickRandom(others,1)[0];
+  qs.push({
+    q: `What's the minimum educational path to become a ${career.name}?`,
+    options: shuffle([career.education.split('.')[0]+'.', decoyEduCareer.education.split('.')[0]+'.', "No formal education is ever needed."]),
+    correct: career.education.split('.')[0]+'.',
+    explain: career.education
+  });
+
+  return qs;
+}
+
+function openGame(careerId, type='quiz'){
+  const career = CAREERS.find(c=>c.id===careerId);
+  document.getElementById('gameOverlay').classList.remove('hidden');
+
+  if(type==='quiz'){
+    gameState = { careerId, type, questions: generateQuiz(career), current:0, score:0, answered:false };
+    renderGameQuestion();
+  } else if(type==='sort'){
+    const correctOrder = career.path.map(s=>s.title);
+    gameState = { careerId, type, correctOrder, pool: shuffle(correctOrder), chosen: [] };
+    renderSortGame();
+  } else if(type==='match'){
+    const skills = career.skills;
+    gameState = {
+      careerId, type,
+      leftItems: shuffle(skills),
+      rightItems: shuffle(skills),
+      selectedLeft: null,
+      matched: [],
+      total: skills.length
+    };
+    renderMatchGame();
+  }
+}
+function closeGame(){ document.getElementById('gameOverlay').classList.add('hidden'); }
+
+/* ---- SORT THE PATH ---- */
+function renderSortGame(){
+  const career = CAREERS.find(c=>c.id===gameState.careerId);
+  document.getElementById('gameCard').innerHTML = `
+    <div class="game-head">
+      <button class="game-close" onclick="closeGame()" aria-label="Close">✕</button>
+      <div class="game-eyebrow">Sort the Path · ${career.name}</div>
+      <h3>Tap the stages in the order they happen</h3>
+    </div>
+    <div class="game-body">
+      <div class="sort-chosen" id="sortChosen">
+        ${gameState.chosen.map((title,i) => `<div class="sort-chosen-item"><span class="n">${i+1}</span>${title}</div>`).join('')}
+      </div>
+      <div class="sort-pool" id="sortPool">
+        ${gameState.pool.map(title => `<button class="sort-pool-btn" onclick="pickSortItem('${title.replace(/'/g,"\\'")}')">${title}</button>`).join('')}
+      </div>
+    </div>
+  `;
+}
+function pickSortItem(title){
+  gameState.chosen.push(title);
+  gameState.pool = gameState.pool.filter(t=>t!==title);
+  if(gameState.pool.length===0){
+    renderSortResult();
+  } else {
+    renderSortGame();
+  }
+}
+function renderSortResult(){
+  const career = CAREERS.find(c=>c.id===gameState.careerId);
+  let hits = 0;
+  const rows = gameState.correctOrder.map((title,i) => {
+    const isHit = gameState.chosen[i]===title;
+    if(isHit) hits++;
+    return `<div class="sort-result-item ${isHit?'hit':'miss'}"><span class="n" style="background:${isHit?'#2E7D6B':'#C0392B'}; color:#fff; width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;flex-shrink:0;">${i+1}</span>${title} ${isHit?'':`<span style="margin-left:auto;font-weight:400;opacity:0.75;">your pick: ${gameState.chosen[i]}</span>`}</div>`;
+  }).join('');
+
+  document.getElementById('gameCard').innerHTML = `
+    <div class="game-head">
+      <button class="game-close" onclick="closeGame()" aria-label="Close">✕</button>
+      <div class="game-eyebrow">Sort the Path · ${career.name}</div>
+      <h3>Result</h3>
+    </div>
+    <div class="game-body">
+      ${rows}
+      <div class="match-status">${hits} of ${gameState.correctOrder.length} in the right place</div>
+      <div class="result-actions" style="margin-top:18px;">
+        <button onclick="closeGame()">Close</button>
+        <button class="retry-btn" onclick="openGame('${career.id}','sort')">Try again</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ---- SKILL MATCH ---- */
+function renderMatchGame(){
+  const career = CAREERS.find(c=>c.id===gameState.careerId);
+  const leftHtml = gameState.leftItems.map(skill => {
+    const isMatched = gameState.matched.includes(skill);
+    const isSelected = gameState.selectedLeft===skill;
+    return `<button class="match-btn ${isMatched?'correct':''} ${isSelected?'selected':''}" ${isMatched?'disabled':''} onclick="pickMatchLeft('${skill.replace(/'/g,"\\'")}')">${skill}</button>`;
+  }).join('');
+  const rightHtml = gameState.rightItems.map(skill => {
+    const isMatched = gameState.matched.includes(skill);
+    return `<button class="match-btn ${isMatched?'correct':''}" id="mr-${skill.replace(/[^a-zA-Z0-9]/g,'')}" ${isMatched?'disabled':''} onclick="pickMatchRight('${skill.replace(/'/g,"\\'")}')">${skillDesc(skill)}</button>`;
+  }).join('');
+
+  document.getElementById('gameCard').innerHTML = `
+    <div class="game-head">
+      <button class="game-close" onclick="closeGame()" aria-label="Close">✕</button>
+      <div class="game-eyebrow">Skill Match · ${career.name}</div>
+      <h3>Match each skill to why it matters</h3>
+    </div>
+    <div class="game-body">
+      <div class="match-grid">
+        <div><div class="match-col-label">Skill</div>${leftHtml}</div>
+        <div><div class="match-col-label">Why it matters</div>${rightHtml}</div>
+      </div>
+      <div class="match-status">${gameState.matched.length} of ${gameState.total} matched</div>
+    </div>
+  `;
+}
+function pickMatchLeft(skill){
+  if(gameState.matched.includes(skill)) return;
+  gameState.selectedLeft = skill;
+  renderMatchGame();
+}
+function pickMatchRight(skill){
+  if(!gameState.selectedLeft || gameState.matched.includes(skill)) return;
+  if(gameState.selectedLeft === skill){
+    gameState.matched.push(skill);
+    gameState.selectedLeft = null;
+    if(gameState.matched.length === gameState.total){
+      renderMatchResult();
+      return;
+    }
+    renderMatchGame();
+  } else {
+    const rightBtn = document.getElementById('mr-'+skill.replace(/[^a-zA-Z0-9]/g,''));
+    if(rightBtn) rightBtn.classList.add('wrong-flash');
+    setTimeout(()=>{ gameState.selectedLeft=null; renderMatchGame(); }, 500);
+  }
+}
+function renderMatchResult(){
+  const career = CAREERS.find(c=>c.id===gameState.careerId);
+  document.getElementById('gameCard').innerHTML = `
+    <div class="game-head">
+      <button class="game-close" onclick="closeGame()" aria-label="Close">✕</button>
+      <div class="game-eyebrow">Skill Match · ${career.name}</div>
+      <h3>Result</h3>
+    </div>
+    <div class="game-body game-result">
+      <div class="result-stamp"><div class="score-num">${gameState.total}/${gameState.total}</div><div class="score-lbl">MATCHED</div></div>
+      <div class="result-title">All matched</div>
+      <div class="result-msg">You've now connected every core skill to the reason it actually matters in this career.</div>
+      <div class="result-actions">
+        <button onclick="closeGame()">Close</button>
+        <button class="retry-btn" onclick="openGame('${career.id}','match')">Play again</button>
+      </div>
+    </div>
+  `;
+}
+
+
+function renderGameQuestion(){
+  const career = CAREERS.find(c=>c.id===gameState.careerId);
+  const q = gameState.questions[gameState.current];
+  const progress = Math.round((gameState.current / gameState.questions.length) * 100);
+
+  document.getElementById('gameCard').innerHTML = `
+    <div class="game-head">
+      <button class="game-close" onclick="closeGame()" aria-label="Close">✕</button>
+      <div class="game-eyebrow">Field Trial · ${career.name}</div>
+      <h3>Question ${gameState.current+1} of ${gameState.questions.length}</h3>
+      <div class="game-progress"><div class="game-progress-bar" style="width:${progress}%"></div></div>
+    </div>
+    <div class="game-body">
+      <div class="game-question">${q.q}</div>
+      <div class="game-options" id="gameOptions">
+        ${q.options.map(opt => `<button class="game-option" onclick="answerGame(this, '${opt.replace(/'/g,"\\'")}')">${opt}</button>`).join('')}
+      </div>
+      <div id="gameExplainSlot"></div>
+    </div>
+  `;
+}
+
+function answerGame(btn, chosen){
+  if(gameState.answered) return;
+  gameState.answered = true;
+  const q = gameState.questions[gameState.current];
+  const allBtns = document.querySelectorAll('#gameOptions .game-option');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if(b.textContent === q.correct) b.classList.add('correct');
+  });
+  if(chosen === q.correct){ gameState.score++; }
+  else{ btn.classList.add('wrong'); }
+
+  document.getElementById('gameExplainSlot').innerHTML = `
+    <div class="game-explain"><strong>${chosen===q.correct ? "Correct." : "Not quite."}</strong> ${q.explain}</div>
+    <button class="game-next" onclick="nextGameQuestion()">${gameState.current+1 < gameState.questions.length ? 'Next question' : 'See result'}</button>
+  `;
+}
+
+function nextGameQuestion(){
+  gameState.current++;
+  gameState.answered = false;
+  if(gameState.current >= gameState.questions.length){
+    renderGameResult();
+  } else {
+    renderGameQuestion();
+  }
+}
+
+function renderGameResult(){
+  const career = CAREERS.find(c=>c.id===gameState.careerId);
+  const total = gameState.questions.length;
+  const score = gameState.score;
+  let msg;
+  if(score===total) msg = `Perfect score. You clearly understand what this path actually involves.`;
+  else if(score>=total/2) msg = `Solid grasp of the basics — a bit more reading on the tricky parts will round it out.`;
+  else msg = `A good starting point. Revisit the path and problems sections above, then try again.`;
+
+  document.getElementById('gameCard').innerHTML = `
+    <div class="game-head">
+      <button class="game-close" onclick="closeGame()" aria-label="Close">✕</button>
+      <div class="game-eyebrow">Field Trial · ${career.name}</div>
+      <h3>Result</h3>
+    </div>
+    <div class="game-body game-result">
+      <div class="result-stamp"><div class="score-num">${score}/${total}</div><div class="score-lbl">SCORE</div></div>
+      <div class="result-title">${score===total ? "Field-ready" : score>=total/2 ? "Good progress" : "Keep exploring"}</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-actions">
+        <button onclick="closeGame()">Close</button>
+        <button class="retry-btn" onclick="openGame('${career.id}','quiz')">Try again</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------------- INIT ---------------- */
+renderChips();
+renderCards();
+</script>
+</body>
+</html>
